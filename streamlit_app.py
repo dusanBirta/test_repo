@@ -20,11 +20,14 @@ def main():
         # Capture the image
         image = capture_image()
 
+        # Convert the color channels from BGR to RGB
+        rgb_image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+
         # Convert the captured image to PIL format
-        pil_image = Image.fromarray(image)
+        pil_image = Image.fromarray(rgb_image)
 
         # Display the captured image
-        st.image(pil_image, channels="BGR", use_column_width=True)
+        st.image(pil_image, channels="RGB", use_column_width=True)
 
 if __name__ == '__main__':
     main()
