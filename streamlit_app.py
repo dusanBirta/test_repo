@@ -1,10 +1,8 @@
+import streamlit as st
 import cv2
 import numpy as np
 import tensorflow as tf
 from tensorflow.keras.models import load_model
-import time
-import streamlit as st
-from threading import Thread
 
 # Load pre-trained model
 model = load_model('rock_paper_scissors_cnn.h5')
@@ -26,46 +24,43 @@ def predict_gesture(image):
 # Streamlit app
 def main():
     # Set page title
-    st.title("Image Classification")
+    st.title("Rock Paper Scissors Image Classification")
 
-    # Capture frames from the webcam
-    frame = st.empty()
+    # Button to start webcam
+    start_button = st.button("Start Webcam")
 
-    # Flag to indicate if frame capturing is complete
-    capturing_complete = False
+    # Initialize variables
+    img_file_buffer = None
+    cv2_img = None
 
-    # Function to capture frame after delay
-    def capture_frame():
-        nonlocal capturing_complete
-        time.sleep(3)
-        frame_data = st.camera_input(width=128, height=128, use_column_width=False)
-        capturing_complete = True
+    if start_button:
+        # Capture image from webcam
+        img_file_buffer = st.camera_input("Take a picture")
+
+    if img_file_buffer is not None:
+        # Read image file buffer with OpenCV
+        bytes_data = img_file_buffer.getvalue()
+        cv2_img = cv2.imdecode(np.frombuffer(bytes_data, np.uint8), cv2.IMREAD_COLOR)
+
+        # Display the type of cv2_img
+        st.write(type(cv2_img))
+
+        # Display the shape of cv2_img
+        st.write(cv2_img.shape)
 
         # Predict gesture
-        if frame_data is not None:
-            gesture = predict_gesture(frame_data)
+        gesture = predict_gesture(cv2_img)
 
-            # Display the predicted gesture
-            if gesture == 0:
-                st.write("You made a Rock!")
-            elif gesture == 1:
-                st.write("You made a Paper!")
-            elif gesture == 2:
-                st.write("You made Scissors!")
+        # Display the predicted gesture
+        if gesture == 0:
+            st.write("You made a Rock!")
+        elif gesture == 1:
+            st.write("You made a Paper!")
+        elif gesture == 2:
+            st.write("You made Scissors!")
 
-    # Start the frame capturing thread
-    thread = Thread(target=capture_frame)
-    thread.start()
-
-    # Loop until frame capturing is complete
-    while not capturing_complete:
-        time.sleep(0.1)
-
-    # Wait for the thread to complete
-    thread.join()
-
-    # Display the captured frame
-    frame.image(frame_data, channels="BGR", use_column_width=True)
+        # Display the captured image
+        st.image(cv2_img, channels="BGR", use_column_width=True)
 
 if __name__ == '__main__':
     main()
