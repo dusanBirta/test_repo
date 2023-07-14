@@ -25,7 +25,7 @@ def predict_gesture(image):
 # Streamlit app
 def main():
     # Set page title
-    st.title("Image Classification")
+    st.title("WEbCam Image Classification")
 
     # Capture frames from the webcam
     frame = st.empty()
