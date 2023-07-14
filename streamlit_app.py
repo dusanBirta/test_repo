@@ -30,24 +30,23 @@ def main():
     start_button = st.button("Start Webcam")
 
     # Initialize variables
-    frame = None
+    img_file_buffer = None
+    cv2_img = None
 
     if start_button:
-        # Create OpenCV video capture
-        cap = cv2.VideoCapture(0)
+        # Capture image from webcam
+        img_file_buffer = st.camera_input("Take a picture")
 
-        # Capture frame from webcam
-        ret, frame = cap.read()
+    if img_file_buffer is not None:
+        # Read image file buffer with OpenCV
+        bytes_data = img_file_buffer.getvalue()
+        cv2_img = cv2.imdecode(np.frombuffer(bytes_data, np.uint8), cv2.IMREAD_COLOR)
 
-        # Release video capture
-        cap.release()
-
-    if frame is not None:
         # Display the captured image
-        st.image(frame, channels="BGR", use_column_width=True)
+        st.image(cv2_img, channels="BGR", use_column_width=True)
 
         # Predict gesture
-        gesture = predict_gesture(frame)
+        gesture = predict_gesture(cv2_img)
 
         # Display the predicted gesture
         if gesture == 0:
