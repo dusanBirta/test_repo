@@ -27,33 +27,27 @@ def main():
     # Set page title
     st.title("Image Classification")
 
-    # Open webcam
-    cap = cv2.VideoCapture(0)
+    # Capture frames from the webcam
+    frame = st.empty()
 
-    # Loop for capturing frames and performing prediction
-    start_time = time.time()
-    while True:
-        ret, frame = cap.read()
+    # Wait for 3 seconds
+    time.sleep(3)
 
-        # Display the frame
-        st.image(frame, channels="BGR", use_column_width=True)
+    # Capture a single frame
+    frame_data = st.camera_input(width=128, height=128, use_column_width=False)
+    if frame_data is not None:
+        frame.image(frame_data, channels="BGR", use_column_width=True)
 
-        # Perform prediction after 3 seconds
-        if time.time() - start_time >= 3:
-            # Predict gesture
-            gesture = predict_gesture(frame)
+        # Predict gesture
+        gesture = predict_gesture(frame_data)
 
-            # Display the predicted gesture
-            if gesture == 0:
-                st.write("You made a Rock!")
-            elif gesture == 1:
-                st.write("You made a Paper!")
-            elif gesture == 2:
-                st.write("You made Scissors!")
-            break
-
-    # Release the webcam
-    cap.release()
+        # Display the predicted gesture
+        if gesture == 0:
+            st.write("You made a Rock!")
+        elif gesture == 1:
+            st.write("You made a Paper!")
+        elif gesture == 2:
+            st.write("You made Scissors!")
 
 if __name__ == '__main__':
     main()
