@@ -3,7 +3,6 @@ import cv2
 import numpy as np
 import tensorflow as tf
 from tensorflow.keras.models import load_model
-from PIL import Image
 
 # Load pre-trained model
 model = load_model('rock_paper_scissors_cnn.h5')
@@ -27,25 +26,20 @@ def main():
     # Set page title
     st.title("Image Classification")
 
-    # Capture image from webcam
-    picture = st.camera_input("Take a picture")
+    # Picture Taken
+   picture = st.camera_input("Take a picture")
 
-    # Perform prediction if an image is captured
-    if picture is not None:
-        # Convert the captured image to NumPy array
-        image_array = np.array(picture)
+    # Perform prediction if an image is uploaded
+    if picture:
+        # Read the uploaded file
+        file_bytes = np.asarray(bytearray(picture.read()), dtype=np.uint8)
+        image = cv2.imdecode(file_bytes, cv2.IMREAD_COLOR)
 
-        # Convert NumPy array to PIL Image
-        pil_image = Image.fromarray(np.uint8(image_array))
-
-        # Convert PIL Image to OpenCV format
-        cv_image = cv2.cvtColor(np.array(pil_image), cv2.COLOR_RGB2BGR)
-
-        # Display the captured image
-        st.image(cv_image, channels="BGR", use_column_width=True)
+        # Display the uploaded image
+        st.image(image, channels="BGR", use_column_width=True)
 
         # Predict gesture
-        gesture = predict_gesture(cv_image)
+        gesture = predict_gesture(image)
 
         # Display the predicted gesture
         if gesture == 0:
