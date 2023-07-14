@@ -42,11 +42,8 @@ def main():
         bytes_data = img_file_buffer.getvalue()
         cv2_img = cv2.imdecode(np.frombuffer(bytes_data, np.uint8), cv2.IMREAD_COLOR)
 
-        # Display the type of cv2_img
-        st.write(type(cv2_img))
-
-        # Display the shape of cv2_img
-        st.write(cv2_img.shape)
+        # Display the captured image
+        st.image(cv2_img, channels="BGR", use_column_width=True)
 
         # Predict gesture
         gesture = predict_gesture(cv2_img)
@@ -58,9 +55,6 @@ def main():
             st.write("You made a Paper!")
         elif gesture == 2:
             st.write("You made Scissors!")
-
-        # Display the captured image
-        st.image(cv2_img, channels="BGR", use_column_width=True)
 
 if __name__ == '__main__':
     main()
