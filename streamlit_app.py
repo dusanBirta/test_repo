@@ -1,9 +1,9 @@
-import streamlit as st
+import cv2
 import numpy as np
 import tensorflow as tf
 from tensorflow.keras.models import load_model
-import av
-from streamlit_webrtc import webrtc_streamer, WebRtcMode, RTCConfiguration
+import time
+import streamlit as st
 
 # Load pre-trained model
 model = load_model('rock_paper_scissors_cnn.h5')
@@ -16,8 +16,7 @@ def preprocess_image(image):
     return img
 
 # Function to predict the gesture
-def predict_gesture(frame):
-    image = frame.to_ndarray(format="bgr24")
+def predict_gesture(image):
     preprocessed_image = preprocess_image(image)
     prediction = model.predict(preprocessed_image)
     predicted_class = np.argmax(prediction)
@@ -28,38 +27,33 @@ def main():
     # Set page title
     st.title("Image Classification")
 
-    # Perform prediction using webcam
-    class VideoProcessor:
-        def __init__(self):
-            self.frame = None
+    # Open webcam
+    cap = cv2.VideoCapture(0)
 
-        def recv(self, frame):
-            self.frame = frame
-            return av.VideoFrame.from_ndarray(frame.to_ndarray(format="bgr24"), format="bgr24")
+    # Loop for capturing frames and performing prediction
+    start_time = time.time()
+    while True:
+        ret, frame = cap.read()
 
-    video_processor = VideoProcessor()
-    webrtc_streamer(
-        key="WYH",
-        mode=WebRtcMode.SENDRECV,
-        rtc_configuration=RTCConfiguration(
-            {"iceServers": [{"urls": ["stun:stun.l.google.com:19302"]}]}
-        ),
-        media_stream_constraints={"video": True, "audio": False},
-        video_processor_factory=video_processor,
-        async_processing=True,
-    )
+        # Display the frame
+        st.image(frame, channels="BGR", use_column_width=True)
 
-    # Predict gesture
-    if video_processor.frame is not None:
-        gesture = predict_gesture(video_processor.frame)
+        # Perform prediction after 3 seconds
+        if time.time() - start_time >= 3:
+            # Predict gesture
+            gesture = predict_gesture(frame)
 
-        # Display the predicted gesture
-        if gesture == 0:
-            st.write("You made a Rock!")
-        elif gesture == 1:
-            st.write("You made a Paper!")
-        elif gesture == 2:
-            st.write("You made Scissors!")
+            # Display the predicted gesture
+            if gesture == 0:
+                st.write("You made a Rock!")
+            elif gesture == 1:
+                st.write("You made a Paper!")
+            elif gesture == 2:
+                st.write("You made Scissors!")
+            break
+
+    # Release the webcam
+    cap.release()
 
 if __name__ == '__main__':
     main()
