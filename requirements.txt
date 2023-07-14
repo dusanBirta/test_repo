@@ -1,0 +1,7 @@
+# latest versions as of 2023-06-27
+streamlit==1.24.0
+tensorflow==2.13.0
+tensorflow_datasets==4.9.2
+numpy==1.24.3
+opencv-python-headless==4.5.5.64
+streamlit_webrtc==0.45.0
