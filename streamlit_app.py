@@ -4,6 +4,7 @@ import tensorflow as tf
 from tensorflow.keras.models import load_model
 import time
 import streamlit as st
+from threading import Thread
 
 # Load pre-trained model
 model = load_model('rock_paper_scissors_cnn.h5')
@@ -25,29 +26,46 @@ def predict_gesture(image):
 # Streamlit app
 def main():
     # Set page title
-    st.title("WEbCam Image Classification")
+    st.title("Image Classification")
 
     # Capture frames from the webcam
     frame = st.empty()
 
-    # Wait for 3 seconds
-    time.sleep(3)
+    # Flag to indicate if frame capturing is complete
+    capturing_complete = False
 
-    # Capture a single frame
-    frame_data = st.camera_input(width=128, height=128, use_column_width=False)
-    if frame_data is not None:
-        frame.image(frame_data, channels="BGR", use_column_width=True)
+    # Function to capture frame after delay
+    def capture_frame():
+        nonlocal capturing_complete
+        time.sleep(3)
+        frame_data = st.camera_input(width=128, height=128, use_column_width=False)
+        capturing_complete = True
 
         # Predict gesture
-        gesture = predict_gesture(frame_data)
+        if frame_data is not None:
+            gesture = predict_gesture(frame_data)
 
-        # Display the predicted gesture
-        if gesture == 0:
-            st.write("You made a Rock!")
-        elif gesture == 1:
-            st.write("You made a Paper!")
-        elif gesture == 2:
-            st.write("You made Scissors!")
+            # Display the predicted gesture
+            if gesture == 0:
+                st.write("You made a Rock!")
+            elif gesture == 1:
+                st.write("You made a Paper!")
+            elif gesture == 2:
+                st.write("You made Scissors!")
+
+    # Start the frame capturing thread
+    thread = Thread(target=capture_frame)
+    thread.start()
+
+    # Loop until frame capturing is complete
+    while not capturing_complete:
+        time.sleep(0.1)
+
+    # Wait for the thread to complete
+    thread.join()
+
+    # Display the captured frame
+    frame.image(frame_data, channels="BGR", use_column_width=True)
 
 if __name__ == '__main__':
     main()
