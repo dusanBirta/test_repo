@@ -31,9 +31,12 @@ def main():
     picture = st.camera_input("Take a picture")
 
     # Perform prediction if an image is captured
-    if picture:
-        # Convert the captured image to PIL Image
-        pil_image = Image.fromarray(picture)
+    if picture is not None:
+        # Convert the captured image to NumPy array
+        image_array = np.array(picture)
+
+        # Convert NumPy array to PIL Image
+        pil_image = Image.fromarray(np.uint8(image_array))
 
         # Convert PIL Image to OpenCV format
         cv_image = cv2.cvtColor(np.array(pil_image), cv2.COLOR_RGB2BGR)
