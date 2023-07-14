@@ -19,8 +19,11 @@ def main():
         # Capture the image
         image = capture_image()
 
+        # Convert the captured image to PIL format
+        pil_image = Image.fromarray(image)
+
         # Display the captured image
-        st.image(image, channels="BGR", use_column_width=True)
+        st.image(pil_image, channels="BGR", use_column_width=True)
 
 if __name__ == '__main__':
     main()
