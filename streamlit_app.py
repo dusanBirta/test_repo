@@ -31,15 +31,18 @@ def main():
     picture = st.camera_input("Take a picture")
 
     # Perform prediction if an image is captured
-    if picture is not None:
-        # Convert the captured image to OpenCV format
-        image = np.array(picture)
+    if picture:
+        # Convert the captured image to PIL Image
+        pil_image = Image.fromarray(picture)
+
+        # Convert PIL Image to OpenCV format
+        cv_image = cv2.cvtColor(np.array(pil_image), cv2.COLOR_RGB2BGR)
 
         # Display the captured image
-        st.image(image, channels="RGB", use_column_width=True)
+        st.image(cv_image, channels="BGR", use_column_width=True)
 
         # Predict gesture
-        gesture = predict_gesture(image)
+        gesture = predict_gesture(cv_image)
 
         # Display the predicted gesture
         if gesture == 0:
