@@ -27,7 +27,7 @@ def main():
     st.title("Image Classification")
 
     # Picture Taken
-   picture = st.camera_input("Take a picture")
+    picture = st.camera_input("Take a picture")
 
     # Perform prediction if an image is uploaded
     if picture:
