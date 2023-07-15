@@ -62,16 +62,18 @@ def main():
 
         if gesture_image_file == "rock.jpg":
             st.write("Computer made Rock!")
+            computer_gesture = 0
         elif gesture_image_file == "paper.jpg":
             st.write("Computer made Paper!")
+            computer_gesture = 1
         elif gesture_image_file == "scissors.jpg":
             st.write("Computer made Scissors!")
+            computer_gesture = 2
 
         # Display the generated rock, paper, or scissors image
         st.image(gesture_image, channels="BGR", use_column_width=True)
 
         # Compare the gestures and declare the winner
-        computer_gesture = np.random.randint(0, 3)
         if gesture == computer_gesture:
             st.write("It's a tie!")
         elif (gesture == 0 and computer_gesture == 2) or (gesture == 1 and computer_gesture == 0) or (gesture == 2 and computer_gesture == 1):
