@@ -21,14 +21,11 @@ def predict_gesture(image):
     predicted_class = np.argmax(prediction)
     return predicted_class
 
-# Function to get image file based on gesture
-def get_gesture_image_file(gesture):
-    if gesture == 0:
-        return "rock.jpg"  # Replace with actual file name for rock image
-    elif gesture == 1:
-        return "paper.jpg"  # Replace with actual file name for paper image
-    elif gesture == 2:
-        return "scissors.jpg"  # Replace with actual file name for scissors image
+# Function to get randomly selected gesture image
+def get_random_gesture_image():
+    gesture_images = ["rock.jpg", "paper.jpg", "scissors.jpg"]  # Replace with actual file names
+    random_image = np.random.choice(gesture_images)
+    return random_image
 
 # Streamlit app
 def main():
@@ -44,14 +41,25 @@ def main():
         file_bytes = np.asarray(bytearray(picture.read()), dtype=np.uint8)
         image = cv2.imdecode(file_bytes, cv2.IMREAD_COLOR)
 
+        # Display the uploaded image
+        st.image(image, channels="BGR", use_column_width=True)
+
         # Predict gesture
         gesture = predict_gesture(image)
 
-        # Get corresponding gesture image file
-        gesture_image_file = get_gesture_image_file(gesture)
+        # Display the predicted gesture
+        if gesture == 0:
+            st.write("You made Rock!")
+        elif gesture == 1:
+            st.write("You made Paper!")
+        elif gesture == 2:
+            st.write("You made Scissors!")
 
-        # Display the gesture image
+        # Get randomly selected gesture image
+        gesture_image_file = get_random_gesture_image()
         gesture_image = cv2.imread(gesture_image_file)
+
+        # Display the generated rock, paper, or scissors image
         st.image(gesture_image, channels="BGR", use_column_width=True)
 
         # Compare the gestures and declare the winner
@@ -61,7 +69,12 @@ def main():
         elif (gesture == 0 and computer_gesture == 2) or (gesture == 1 and computer_gesture == 0) or (gesture == 2 and computer_gesture == 1):
             st.write("You win!")
         else:
-            st.write("Computer wins!")
+            if computer_gesture == 0:
+                st.write("Computer makes a rock!")
+            elif computer_gesture == 1:
+                st.write("Computer makes paper!")
+            else:
+                st.write("Computer makes scissors!")
 
 if __name__ == '__main__':
     main()
