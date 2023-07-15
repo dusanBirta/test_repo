@@ -21,6 +21,12 @@ def predict_gesture(image):
     predicted_class = np.argmax(prediction)
     return predicted_class
 
+# Function to get randomly selected gesture image
+def get_random_gesture_image():
+    gesture_images = ["rock.jpg", "paper.jpg", "scissors.jpg"]  # Replace with actual file names
+    random_image = np.random.choice(gesture_images)
+    return random_image
+
 # Streamlit app
 def main():
     # Set page title
@@ -48,6 +54,22 @@ def main():
             st.write("You made Paper!")
         elif gesture == 2:
             st.write("You made Scissors!")
+
+        # Get randomly selected gesture image
+        gesture_image_file = get_random_gesture_image()
+        gesture_image = cv2.imread(gesture_image_file)
+
+        # Display the generated rock, paper, or scissors image
+        st.image(gesture_image, channels="BGR", use_column_width=True)
+
+        # Compare the gestures and declare the winner
+        computer_gesture = np.random.randint(0, 3)
+        if gesture == computer_gesture:
+            st.write("It's a tie!")
+        elif (gesture == 0 and computer_gesture == 2) or (gesture == 1 and computer_gesture == 0) or (gesture == 2 and computer_gesture == 1):
+            st.write("You win!")
+        else:
+            st.write("Computer wins!")
 
 if __name__ == '__main__':
     main()
