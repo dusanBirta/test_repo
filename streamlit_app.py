@@ -31,7 +31,7 @@ def get_random_gesture_image():
 # Streamlit app
 def main():
     # Set page title
-    st.title("Rock, Paper, Scissors. Image Classification")
+    st.title("Rock, Paper, Scissors, Game")
 
     # Picture Taken
     picture = st.camera_input("Take a picture")
