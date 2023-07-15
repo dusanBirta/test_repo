@@ -3,6 +3,7 @@ import cv2
 import numpy as np
 import tensorflow as tf
 from tensorflow.keras.models import load_model
+import urllib
 
 # Load pre-trained model
 model = load_model('rock_paper_scissors_cnn.h5')
@@ -59,6 +60,13 @@ def main():
         gesture_image_file = get_random_gesture_image()
         gesture_image = cv2.imread(gesture_image_file)
 
+        if gesture_image_file == "rock.jpg":
+            st.write("Computer made Rock!")
+        elif gesture_image_file == "paper.jpg":
+            st.write("Computer made Paper!")
+        elif gesture_image_file == "scissors.jpg":
+            st.write("Computer made Scissors!")
+
         # Display the generated rock, paper, or scissors image
         st.image(gesture_image, channels="BGR", use_column_width=True)
 
@@ -69,12 +77,7 @@ def main():
         elif (gesture == 0 and computer_gesture == 2) or (gesture == 1 and computer_gesture == 0) or (gesture == 2 and computer_gesture == 1):
             st.write("You win!")
         else:
-            if computer_gesture == 0:
-                st.write("Computer makes a rock!")
-            elif computer_gesture == 1:
-                st.write("Computer makes paper!")
-            else:
-                st.write("Computer makes scissors!")
+            st.write("Computer wins!")
 
 if __name__ == '__main__':
     main()
