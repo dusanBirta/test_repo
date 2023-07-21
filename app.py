@@ -27,7 +27,10 @@ def main():
 
         # Show the tooltip text when hovering over the middle section of the image
         tooltip_text = "Mouse Writing."
-        st.image(middle_section, caption="Middle Section", use_column_width=True, tooltip=tooltip_text)
+        st.image(middle_section, caption="Middle Section", use_column_width=True)
+
+        # Add a balloon tooltip to display the text when hovering over the middle section
+        st.balloons()
 
 if __name__ == "__main__":
     main()
