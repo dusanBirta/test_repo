@@ -29,18 +29,23 @@ def main():
                     var description = prompt("Enter a description for this area:");
                     if (description) {{
                         descriptions[description] = {{ x: mouseX, y: mouseY }};
-                        updateDescriptions();
                     }}
                 }}
 
-                function updateDescriptions() {{
+                function handleMouseOver(event) {{
+                    var mouseX = event.clientX;
+                    var mouseY = event.clientY;
+
                     var messageDiv = document.getElementById('message');
                     messageDiv.innerHTML = '';
 
-                    // Display descriptions
+                    // Display descriptions for the hovered area
                     for (var key in descriptions) {{
                         var coord = descriptions[key];
-                        messageDiv.innerHTML += '<p style="position: absolute; left: ' + coord.x + 'px; top: ' + coord.y + 'px; background-color: #555; color: #fff; border-radius: 6px; padding: 5px;">' + key + '</p>';
+                        var distance = Math.sqrt((mouseX - coord.x) ** 2 + (mouseY - coord.y) ** 2);
+                        if (distance <= 20) {{  // Only display descriptions within a radius of 20 pixels
+                            messageDiv.innerHTML += '<p style="position: absolute; left: ' + coord.x + 'px; top: ' + coord.y + 'px; background-color: #555; color: #fff; border-radius: 6px; padding: 5px;">' + key + '</p>';
+                        }}
                     }}
                 }}
             </script>
