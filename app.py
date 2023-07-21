@@ -20,7 +20,7 @@ def main():
             click_html = f"""
             <div style="position: relative; display: inline-block;">
                 <img src="data:image/png;base64,{img_base64}" alt="Image" width="400" height="400"
-                     onclick="handleClick()">
+                     onclick="handleClick(event)">
                 <div id="message" style="visibility: hidden; width: 100px; background-color: #555; color: #fff;
                             text-align: center; border-radius: 6px; padding: 5px; position: absolute;
                             z-index: 1; top: 50%; left: 50%; transform: translate(-50%, -50%);">
@@ -28,8 +28,16 @@ def main():
                 </div>
             </div>
             <script>
-                function handleClick() {{
+                function handleClick(event) {{
                     var message = document.getElementById('message');
+                    var image = event.target;
+                    var mouseX = event.offsetX;
+                    var imageWidth = image.clientWidth;
+                    if (mouseX < imageWidth / 2) {{
+                        message.style.left = "10%";
+                    }} else {{
+                        message.style.left = "90%";
+                    }}
                     message.style.visibility = 'visible';
                 }}
             </script>
