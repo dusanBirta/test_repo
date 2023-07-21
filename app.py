@@ -7,9 +7,6 @@ def main():
     # File uploader to get the image from the user
     uploaded_file = st.file_uploader("Upload an image", type=["jpg", "jpeg", "png"])
 
-    # Text input to allow the user to input the text for click event
-    click_text = st.text_input("Enter text for click event:", "Click")
-
     if uploaded_file is not None:
         # Read the image as bytes and convert it to base64
         if uploaded_file.type.startswith("image/"):
@@ -21,22 +18,42 @@ def main():
             <div style="position: relative; display: inline-block;">
                 <img src="data:image/png;base64,{img_base64}" alt="Image" width="400" height="400"
                      onclick="handleClick(event)">
-                <div id="message" style="visibility: hidden; width: 100px; background-color: #555; color: #fff;
-                            text-align: center; border-radius: 6px; padding: 5px; position: absolute;
-                            z-index: 1;">
-                    {click_text}
-                </div>
             </div>
             <script>
+                // Dictionary to store descriptions and coordinates
+                var descriptions = {{}};
+
                 function handleClick(event) {{
-                    var message = document.getElementById('message');
                     var mouseX = event.clientX;
                     var mouseY = event.clientY;
-                    message.style.left = mouseX + 'px';
-                    message.style.top = mouseY + 'px';
-                    message.style.visibility = 'visible';
+                    var description = prompt("Enter a description for this area:");
+                    if (description) {{
+                        descriptions[description] = {{ x: mouseX, y: mouseY }};
+                        updateDescriptions();
+                    }}
+                }}
+
+                function updateDescriptions() {{
+                    var messageDiv = document.getElementById('message');
+                    var canvas = document.getElementById('canvas');
+                    var ctx = canvas.getContext('2d');
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                    // Draw bounding boxes and display descriptions
+                    for (var key in descriptions) {{
+                        var coord = descriptions[key];
+                        ctx.beginPath();
+                        ctx.rect(coord.x, coord.y, 100, 50);
+                        ctx.lineWidth = 2;
+                        ctx.strokeStyle = 'red';
+                        ctx.stroke();
+
+                        messageDiv.innerHTML += '<p style="position: absolute; left: ' + coord.x + 'px; top: ' + coord.y + 'px; background-color: #555; color: #fff; border-radius: 6px; padding: 5px;">' + key + '</p>';
+                    }}
                 }}
             </script>
+            <canvas id="canvas" width="400" height="400" style="position: absolute; top: 0; left: 0; pointer-events: none;"></canvas>
+            <div id="message" style="position: absolute; top: 0; left: 0;"></div>
             """
 
             # Display the custom HTML template for the click event
