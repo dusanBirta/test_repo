@@ -17,7 +17,7 @@ def main():
             click_html = f"""
             <div style="position: relative; display: inline-block;">
                 <img src="data:image/png;base64,{img_base64}" alt="Image" width="400" height="400"
-                     onclick="handleClick(event)">
+                     onclick="handleClick(event)" onmousemove="handleMouseOver(event)">
             </div>
             <script>
                 // Dictionary to store descriptions and coordinates
@@ -28,7 +28,7 @@ def main():
                     var mouseY = event.clientY;
                     var description = prompt("Enter a description for this area:");
                     if (description) {{
-                        descriptions[description] = {{ x: mouseX, y: mouseY }};
+                        descriptions[`${mouseX}-${mouseY}`] = description;
                     }}
                 }}
 
@@ -41,10 +41,10 @@ def main():
 
                     // Display descriptions for the hovered area
                     for (var key in descriptions) {{
-                        var coord = descriptions[key];
-                        var distance = Math.sqrt((mouseX - coord.x) ** 2 + (mouseY - coord.y) ** 2);
+                        var coords = key.split('-');
+                        var distance = Math.sqrt((mouseX - coords[0]) ** 2 + (mouseY - coords[1]) ** 2);
                         if (distance <= 50) {{  // Only display descriptions within a radius of 50 pixels
-                            messageDiv.innerHTML += '<p style="position: absolute; left: ' + coord.x + 'px; top: ' + coord.y + 'px; background-color: #555; color: #fff; border-radius: 6px; padding: 5px;">' + key + '</p>';
+                            messageDiv.innerHTML += '<p style="position: absolute; left: ' + coords[0] + 'px; top: ' + coords[1] + 'px; background-color: #555; color: #fff; border-radius: 6px; padding: 5px;">' + descriptions[key] + '</p>';
                         }}
                     }}
                 }}
