@@ -1,6 +1,7 @@
 import streamlit as st
 import cv2
 import numpy as np
+from streamlit import components
 
 # Function to get the middle section of the image
 def get_middle_section(image):
@@ -10,7 +11,6 @@ def get_middle_section(image):
 
 # Custom HTML template for the tooltip
 def custom_html(image_bytes, tooltip_text):
-    tooltip_text = tooltip_text.replace('"', "&quot;").replace("'", "&apos;").replace("<", "&lt;").replace(">", "&gt;")
     return f"""
     <style>
     .container {{
@@ -67,7 +67,7 @@ def main():
 
         # Call the function to display the image with the tooltip
         tooltip_text = "Mouse Writing."
-        st.markup(custom_html(middle_section_base64, tooltip_text), unsafe_allow_html=True)
+        components.html(custom_html(middle_section_base64, tooltip_text), height=400)
 
 if __name__ == "__main__":
     main()
