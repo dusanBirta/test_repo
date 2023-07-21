@@ -25,35 +25,28 @@ def main():
         # Display the original image
         st.image(image, caption="Uploaded Image", use_column_width=True)
 
-        # Show the middle section of the image
-        st.image(middle_section, caption="Middle Section", use_column_width=True)
+        # Convert the middle section to base64 to be used in the tooltip
+        _, encoded_middle_section = cv2.imencode(".png", middle_section)
+        middle_section_base64 = encoded_middle_section.tobytes()
 
-        # Convert the image to RGB (OpenCV uses BGR by default)
-        image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+        # Custom HTML template for the tooltip
+        tooltip_text = "Mouse is hovering."
+        tooltip_html = f"""
+        <div style="position: relative; display: inline-block;">
+            <img src="data:image/png;base64,{middle_section_base64}" alt="Image" width="400" height="400">
+            <div style="visibility: hidden; width: 150px; background-color: #555; color: #fff;
+                        text-align: center; border-radius: 6px; padding: 5px; position: absolute;
+                        z-index: 1; bottom: 120%; left: 50%; margin-left: -75px;"
+                onmouseover="this.style.visibility='visible';"
+                onmouseout="this.style.visibility='hidden';"
+            >
+                {tooltip_text}
+            </div>
+        </div>
+        """
 
-        # Function to handle mouse events
-        def mouse_event(event, x, y, flags, param):
-            if event == cv2.EVENT_MOUSEMOVE:
-                # Check if the mouse is hovering over the middle section
-                middle_x, middle_y = int(image.shape[1] / 2), int(image.shape[0] / 2)
-                if middle_x - 50 <= x <= middle_x + 50 and middle_y - 50 <= y <= middle_y + 50:
-                    # Write "Mouse is hovering" on the image
-                    cv2.putText(image_rgb, "Mouse is hovering", (middle_x - 50, middle_y), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 1)
-
-        # Create a window to display the image
-        cv2.namedWindow("Image")
-        cv2.setMouseCallback("Image", mouse_event)
-
-        while True:
-            # Display the image with OpenCV
-            cv2.imshow("Image", image_rgb)
-
-            # Exit the loop if the user presses the 'Esc' key
-            if cv2.waitKey(1) == 27:
-                break
-
-        # Close the OpenCV window
-        cv2.destroyAllWindows()
+        # Display the image with the tooltip
+        st.components.v1.html(tooltip_html, height=400, scrolling=False)
 
 if __name__ == "__main__":
     main()
