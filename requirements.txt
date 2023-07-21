@@ -1,5 +1,4 @@
 # latest versions as of 2023-06-27
 streamlit
-opencv-python>=4.1.1
-Pillow>=7.1.2
-ultralytics>=8.0.111
+opencv-python
+numpy
