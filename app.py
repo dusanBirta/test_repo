@@ -12,35 +12,16 @@ def get_middle_section(image):
 # Custom HTML template for the tooltip
 def custom_html(image_bytes, tooltip_text):
     return f"""
-    <style>
-    .container {{
-        position: relative;
-        display: inline-block;
-    }}
-    .image {{
-        display: block;
-    }}
-    .tooltip {{
-        visibility: hidden;
-        width: 150px;
-        background-color: #555;
-        color: #fff;
-        text-align: center;
-        border-radius: 6px;
-        padding: 5px;
-        position: absolute;
-        z-index: 1;
-        bottom: 120%;
-        left: 50%;
-        margin-left: -75px;
-    }}
-    .container:hover .tooltip {{
-        visibility: visible;
-    }}
-    </style>
-    <div class="container">
-        <img class="image" src="data:image/png;base64,{image_bytes}" alt="Image" width="400" height="400">
-        <div class="tooltip">{tooltip_text}</div>
+    <div style="position: relative; display: inline-block;">
+        <img src="data:image/png;base64,{image_bytes}" alt="Image" width="400" height="400">
+        <div style="visibility: hidden; width: 150px; background-color: #555; color: #fff;
+                    text-align: center; border-radius: 6px; padding: 5px; position: absolute;
+                    z-index: 1; bottom: 120%; left: 50%; margin-left: -75px;"
+            onmouseover="this.style.visibility='visible';"
+            onmouseout="this.style.visibility='hidden';"
+        >
+            {tooltip_text}
+        </div>
     </div>
     """
 
@@ -67,7 +48,7 @@ def main():
 
         # Call the function to display the image with the tooltip
         tooltip_text = "Mouse Writing."
-        components.html(custom_html(middle_section_base64, tooltip_text), height=400)
+        st.components.v1.html(custom_html(middle_section_base64, tooltip_text))
 
 if __name__ == "__main__":
     main()
