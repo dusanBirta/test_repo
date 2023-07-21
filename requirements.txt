@@ -1,4 +1,4 @@
 # latest versions as of 2023-06-27
 streamlit
-PIL
+pillow
 ultralytics
