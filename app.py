@@ -17,8 +17,8 @@ def main():
         # Display the uploaded image
         st.image(uploaded_file, use_column_width=True, caption="Uploaded Image")
 
-        # Pass the uploaded image to the custom component
-        result = mouse_events_component(uploaded_file)
+        # Pass the uploaded image to the custom component with a label
+        result = mouse_events_component(uploaded_image=uploaded_file)
 
         # Display the dynamic updates based on mouse events
         if result is not None:
