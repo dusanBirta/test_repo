@@ -1,5 +1,6 @@
 # latest versions as of 2023-06-27
 streamlit
 Pillow
-#opencv-python-headless
+opencv-python
+opencv-python-headless>=4.1.2
 ultralytics==8.0.139
