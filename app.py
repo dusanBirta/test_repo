@@ -1,69 +1,70 @@
-# Import required libraries
-import PIL
-
 import streamlit as st
-from ultralytics import YOLO
+import cv2
+import numpy as np
+from streamlit import components
 
-# Replace the relative path to your weight file
-model_path = 'weights/yolov8n.pt'
+def main():
+    st.title("Mouse Writing App")
 
-# Setting page layout
-st.set_page_config(
-    page_title="Object Detection using YOLOv8",  # Setting page title
-    page_icon="🤖",     # Setting page icon
-    layout="wide",      # Setting layout to wide
-    initial_sidebar_state="expanded"    # Expanding sidebar by default
-)
+    # File uploader to get the image from the user
+    uploaded_file = st.file_uploader("Upload an image", type=["jpg", "jpeg", "png"])
 
-# Creating sidebar
-with st.sidebar:
-    st.header("Image/Video Config")     # Adding header to sidebar
-    # Adding file uploader to sidebar for selecting images
-    source_img = st.file_uploader(
-        "Choose an image...", type=("jpg", "jpeg", "png", 'bmp', 'webp'))
+    if uploaded_file is not None:
+        # Read the image using OpenCV
+        image = np.array(bytearray(uploaded_file.read()), dtype=np.uint8)
+        image = cv2.imdecode(image, 1)
 
-    # Model Options
-    confidence = float(st.slider(
-        "Select Model Confidence", 25, 100, 40)) / 100
+        # Get the middle section of the image
+        middle_section = get_middle_section(image)
 
-# Creating main page heading
-st.title("Object Detection using YOLOv8")
+        # Display the original image
+        st.image(image, caption="Uploaded Image", use_column_width=True)
 
-# Creating two columns on the main page
-col1, col2 = st.columns(2)
+        # Convert the middle section to base64 to be used in the tooltip
+        _, encoded_middle_section = cv2.imencode(".png", middle_section)
+        middle_section_base64 = encoded_middle_section.tobytes().encode("base64").decode()
 
-# Adding image to the first column if image is uploaded
-with col1:
-    if source_img:
-        # Opening the uploaded image
-        uploaded_image = PIL.Image.open(source_img)
-        # Adding the uploaded image to the page with a caption
-        st.image(source_img,
-                 caption="Uploaded Image",
-                 use_column_width=True
-                 )
+        # Call the function to display the image with the tooltip
+        st.components.v1.html(custom_html(middle_section_base64, "Mouse Writing."))
 
-try:
-    model = YOLO(model_path)
-except Exception as ex:
-    st.error(
-        f"Unable to load model. Check the specified path: {model_path}")
-    st.error(ex)
 
-if st.sidebar.button('Detect Objects'):
-    res = model.predict(uploaded_image,
-                        conf=confidence
-                        )
-    boxes = res[0].boxes
-    res_plotted = res[0].plot()[:, :, ::-1]
-    with col2:
-        st.image(res_plotted,
-                 caption='Detected Image',
-                 use_column_width=True
-                 )
-        try:
-            with st.expander("Detection Results"):
-                for box in boxes:
-                    st.write(box.xywh)
-        except Exception as ex:
-            st.write("No image is uploaded yet!")
+# Function to get the middle section of the image
+def get_middle_section(image):
+    height, width, _ = image.shape
+    middle_x, middle_y = int(width / 2), int(height / 2)
+    return image[middle_y - 50 : middle_y + 50, middle_x - 50 : middle_x + 50]
+
+# Custom HTML template for the tooltip
+def custom_html(image_url, tooltip_text):
+    return f"""
+    <style>
+    .container {{
+        position: relative;
+        display: inline-block;
+    }}
+    .image {{
+        display: block;
+    }}
+    .tooltip {{
+        visibility: hidden;
+        width: 150px;
+        background-color: #555;
+        color: #fff;
+        text-align: center;
+        border-radius: 6px;
+        padding: 5px;
+        position: absolute;
+        z-index: 1;
+        bottom: 100%;
+        left: 50%;
+        margin-left: -75px;
+    }}
+    .container:hover .tooltip {{
+        visibility: visible;
+    }}
+    </style>
+    <div class="container">
+        <img class="image" src="{image_url}" alt="Image" width="400" height="400">
+        <div class="tooltip">{tooltip_text}</div>
+    </div>
+    """
