@@ -17,8 +17,7 @@ def main():
         image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
         # Display the image with mouse hover text
-        st.image(image_rgb, use_column_width=True, caption="Mouse hover", format="RGB",
-                 output_format="auto")
+        st.image(image_rgb, use_column_width=True, caption="Mouse hover")
 
 if __name__ == "__main__":
     main()
