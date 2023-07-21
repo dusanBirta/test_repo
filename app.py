@@ -35,24 +35,15 @@ def main():
 
                 function updateDescriptions() {{
                     var messageDiv = document.getElementById('message');
-                    var canvas = document.getElementById('canvas');
-                    var ctx = canvas.getContext('2d');
-                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    messageDiv.innerHTML = '';
 
-                    // Draw bounding boxes and display descriptions
+                    // Display descriptions
                     for (var key in descriptions) {{
                         var coord = descriptions[key];
-                        ctx.beginPath();
-                        ctx.rect(coord.x, coord.y, 100, 50);
-                        ctx.lineWidth = 2;
-                        ctx.strokeStyle = 'red';
-                        ctx.stroke();
-
                         messageDiv.innerHTML += '<p style="position: absolute; left: ' + coord.x + 'px; top: ' + coord.y + 'px; background-color: #555; color: #fff; border-radius: 6px; padding: 5px;">' + key + '</p>';
                     }}
                 }}
             </script>
-            <canvas id="canvas" width="400" height="400" style="position: absolute; top: 0; left: 0; pointer-events: none;"></canvas>
             <div id="message" style="position: absolute; top: 0; left: 0;"></div>
             """
 
