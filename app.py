@@ -7,6 +7,9 @@ def main():
     # File uploader to get the image from the user
     uploaded_file = st.file_uploader("Upload an image", type=["jpg", "jpeg", "png"])
 
+    # Text input to allow the user to input the text for click event
+    click_text = st.text_input("Enter text for click event:", "Click")
+
     if uploaded_file is not None:
         # Read the image as bytes and convert it to base64
         if uploaded_file.type.startswith("image/"):
@@ -21,7 +24,7 @@ def main():
                 <div id="message" style="visibility: hidden; width: 100px; background-color: #555; color: #fff;
                             text-align: center; border-radius: 6px; padding: 5px; position: absolute;
                             z-index: 1;">
-                    Click
+                    {click_text}
                 </div>
             </div>
             <script>
