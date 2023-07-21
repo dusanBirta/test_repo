@@ -66,7 +66,8 @@ def main():
         middle_section_base64 = encoded_middle_section.tobytes()
 
         # Call the function to display the image with the tooltip
-        st.components.v1.html(custom_html(middle_section_base64, "Mouse Writing."))
+        tooltip_text = "Mouse Writing."
+        st.html(custom_html(middle_section_base64, tooltip_text))
 
 if __name__ == "__main__":
     main()
