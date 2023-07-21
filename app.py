@@ -1,5 +1,6 @@
 import streamlit as st
 from streamlit.components.v1 import declare_component
+import base64
 
 # Declare the custom component with the JavaScript code
 mouse_events_component = declare_component(
@@ -20,7 +21,7 @@ def main():
         # Read the image as bytes and convert it to base64
         if uploaded_file.type.startswith("image/"):
             img_bytes = uploaded_file.read()
-            img_base64 = img_bytes.encode("base64").decode()
+            img_base64 = base64.b64encode(img_bytes).decode()
 
             # Pass the base64 string to the custom component
             result = mouse_events_component(uploaded_image=img_base64)
