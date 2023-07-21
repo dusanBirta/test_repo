@@ -10,7 +10,8 @@ def get_middle_section(image):
     return image[middle_y - 50 : middle_y + 50, middle_x - 50 : middle_x + 50]
 
 # Custom HTML template for the tooltip
-def custom_html(image_url, tooltip_text):
+def custom_html(image_bytes, tooltip_text):
+    image_base64 = image_bytes.encode("base64").decode()
     return f"""
     <style>
     .container {{
@@ -39,7 +40,7 @@ def custom_html(image_url, tooltip_text):
     }}
     </style>
     <div class="container">
-        <img class="image" src="{image_url}" alt="Image" width="400" height="400">
+        <img class="image" src="data:image/png;base64,{image_base64}" alt="Image" width="400" height="400">
         <div class="tooltip">{tooltip_text}</div>
     </div>
     """
@@ -63,7 +64,7 @@ def main():
 
         # Convert the middle section to base64 to be used in the tooltip
         _, encoded_middle_section = cv2.imencode(".png", middle_section)
-        middle_section_base64 = encoded_middle_section.tobytes().encode("base64").decode()
+        middle_section_base64 = encoded_middle_section.tobytes()
 
         # Call the function to display the image with the tooltip
         st.components.v1.html(custom_html(middle_section_base64, "Mouse Writing."))
