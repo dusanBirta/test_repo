@@ -2,7 +2,7 @@ import streamlit as st
 import base64
 
 def main():
-    st.title("Mouse Hover App")
+    st.title("Mouse Click App")
 
     # File uploader to get the image from the user
     uploaded_file = st.file_uploader("Upload an image", type=["jpg", "jpeg", "png"])
@@ -16,38 +16,27 @@ def main():
             img_bytes = uploaded_file.read()
             img_base64 = base64.b64encode(img_bytes).decode()
 
-            # Custom HTML template for the tooltip
-            tooltip_html = f"""
+            # Custom HTML template for the click event
+            click_html = f"""
             <div style="position: relative; display: inline-block;">
                 <img src="data:image/png;base64,{img_base64}" alt="Image" width="400" height="400"
-                     onmouseover="showText(event)" onmouseout="hideText(event)">
-                <div id="tooltip" style="visibility: hidden; width: 150px; background-color: #555; color: #fff;
+                     onclick="handleClick()">
+                <div id="message" style="visibility: hidden; width: 100px; background-color: #555; color: #fff;
                             text-align: center; border-radius: 6px; padding: 5px; position: absolute;
-                            z-index: 1; bottom: 120%; left: 50%; margin-left: -75px;">
+                            z-index: 1; top: 50%; left: 50%; transform: translate(-50%, -50%);">
+                    Click
                 </div>
             </div>
             <script>
-                function showText(event) {{
-                    var tooltip = document.getElementById('tooltip');
-                    var image = event.target;
-                    var mouseX = event.offsetX;
-                    var imageWidth = image.clientWidth;
-                    if (mouseX < imageWidth / 2) {{
-                        tooltip.innerHTML = 'Left';
-                    }} else {{
-                        tooltip.innerHTML = 'Right';
-                    }}
-                    tooltip.style.visibility = 'visible';
-                }}
-                function hideText(event) {{
-                    var tooltip = document.getElementById('tooltip');
-                    tooltip.style.visibility = 'hidden';
+                function handleClick() {{
+                    var message = document.getElementById('message');
+                    message.style.visibility = 'visible';
                 }}
             </script>
             """
 
-            # Display the image with the tooltip
-            st.components.v1.html(tooltip_html, height=400, scrolling=False)
+            # Display the image with the click event
+            st.components.v1.html(click_html, height=400, scrolling=False)
 
 if __name__ == "__main__":
     main()
