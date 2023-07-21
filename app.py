@@ -10,6 +10,7 @@ def get_middle_section(image):
 
 # Custom HTML template for the tooltip
 def custom_html(image_bytes, tooltip_text):
+    tooltip_text = tooltip_text.replace('"', "&quot;").replace("'", "&apos;").replace("<", "&lt;").replace(">", "&gt;")
     return f"""
     <style>
     .container {{
@@ -29,7 +30,7 @@ def custom_html(image_bytes, tooltip_text):
         padding: 5px;
         position: absolute;
         z-index: 1;
-        bottom: 100%;
+        bottom: 120%;
         left: 50%;
         margin-left: -75px;
     }}
