@@ -2,4 +2,3 @@
 streamlit
 Pillow
 ultralytics
-opencv==4.8.0
