@@ -17,16 +17,21 @@ def main():
         # Display the uploaded image
         st.image(uploaded_file, use_column_width=True, caption="Uploaded Image")
 
-        # Pass the uploaded image to the custom component with a label
-        result = mouse_events_component(uploaded_image=uploaded_file)
+        # Read the image as bytes and convert it to base64
+        if uploaded_file.type.startswith("image/"):
+            img_bytes = uploaded_file.read()
+            img_base64 = img_bytes.encode("base64").decode()
 
-        # Display the dynamic updates based on mouse events
-        if result is not None:
-            if "click" in result:
-                st.image(uploaded_file, use_column_width=True, caption="Click: 'click'")
+            # Pass the base64 string to the custom component
+            result = mouse_events_component(uploaded_image=img_base64)
 
-            if "hovering" in result:
-                st.image(uploaded_file, use_column_width=True, caption=f"Hover: {result}")
+            # Display the dynamic updates based on mouse events
+            if result is not None:
+                if "click" in result:
+                    st.image(img_bytes, use_column_width=True, caption="Click: 'click'")
+
+                if "hovering" in result:
+                    st.image(img_bytes, use_column_width=True, caption=f"Hover: {result}")
 
 if __name__ == "__main__":
     main()
