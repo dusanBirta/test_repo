@@ -28,7 +28,7 @@ def main():
                     var mouseY = event.clientY;
                     var description = prompt("Enter a description for this area:");
                     if (description) {{
-                        descriptions[`${mouseX}-${mouseY}`] = description;
+                        descriptions[mouseX + '-' + mouseY] = description;
                     }}
                 }}
 
