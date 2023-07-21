@@ -4,6 +4,7 @@
 #ultralytics
 #opencv-python-headless
 
+pip install --upgrade pip
 ultralytics
 streamlit
 
