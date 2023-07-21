@@ -11,7 +11,6 @@ def get_middle_section(image):
 
 # Custom HTML template for the tooltip
 def custom_html(image_bytes, tooltip_text):
-    image_base64 = image_bytes.encode("base64").decode()
     return f"""
     <style>
     .container {{
@@ -40,7 +39,7 @@ def custom_html(image_bytes, tooltip_text):
     }}
     </style>
     <div class="container">
-        <img class="image" src="data:image/png;base64,{image_base64}" alt="Image" width="400" height="400">
+        <img class="image" src="data:image/png;base64,{image_bytes}" alt="Image" width="400" height="400">
         <div class="tooltip">{tooltip_text}</div>
     </div>
     """
