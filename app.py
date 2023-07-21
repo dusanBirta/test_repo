@@ -8,9 +8,6 @@ def main():
     uploaded_file = st.file_uploader("Upload an image", type=["jpg", "jpeg", "png"])
 
     if uploaded_file is not None:
-        # Display the uploaded image
-        st.image(uploaded_file, use_column_width=True, caption="Uploaded Image")
-
         # Read the image as bytes and convert it to base64
         if uploaded_file.type.startswith("image/"):
             img_bytes = uploaded_file.read()
@@ -39,7 +36,7 @@ def main():
             </script>
             """
 
-            # Display the image with the click event
+            # Display the custom HTML template for the click event
             st.components.v1.html(click_html, height=400, scrolling=False)
 
 if __name__ == "__main__":
