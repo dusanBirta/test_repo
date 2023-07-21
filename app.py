@@ -43,7 +43,7 @@ def main():
                     for (var key in descriptions) {{
                         var coord = descriptions[key];
                         var distance = Math.sqrt((mouseX - coord.x) ** 2 + (mouseY - coord.y) ** 2);
-                        if (distance <= 20) {{  // Only display descriptions within a radius of 20 pixels
+                        if (distance <= 50) {{  // Only display descriptions within a radius of 50 pixels
                             messageDiv.innerHTML += '<p style="position: absolute; left: ' + coord.x + 'px; top: ' + coord.y + 'px; background-color: #555; color: #fff; border-radius: 6px; padding: 5px;">' + key + '</p>';
                         }}
                     }}
