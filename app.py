@@ -1,13 +1,13 @@
 from ultralytics import YOLO
 import streamlit as st
-
 import base64
 import torch
 from PIL import Image
+import io
 
 def predict_with_yolov8(img_bytes):
-    # Load YOLOv8 model with the weights file
-    model = YOLO("yolov8n.pt", weights="best.pt")
+    # Load YOLOv8 model with the weights file "best.pt"
+    model = YOLO(export="best.pt")
 
     # Convert the image bytes to PIL image
     pil_image = Image.open(io.BytesIO(img_bytes))
