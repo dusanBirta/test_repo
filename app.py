@@ -10,7 +10,7 @@ import os
 def predict_with_yolov8(img):
     # Load YOLOv8 model with the weights file "best.pt" and using the provided command-line arguments
     model = YOLO(model='best.pt')
-    source = img
+    source = uploaded_file
 
     # Run inference on the image
     results = model(source)
