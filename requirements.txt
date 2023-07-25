@@ -1,6 +1,6 @@
 # latest versions as of 2023-06-27
-ultralytics
-streamlit
+#ultralytics
+#streamlit
 #opencv-python-headless
 #mesa
 #numpy>=1.20
@@ -10,16 +10,8 @@ streamlit
 #ultralytics==8.0.139
 
 
-
-# base ----------------------------------------
-matplotlib>=3.2.2
-numpy>=1.18.5
-opencv-python
-opencv-python-headless>=4.1.2
-Pillow
-PyYAML>=5.3.1
-scipy>=1.4.1
-torch==1.7.1
-torchvision>=0.8.1
-tqdm>=4.41.0
-click==8
+opencv-python-headless==4.7.0.72
+streamlit-image-comparison==0.0.4
+pandas==2.0.2
+ultralytics==8.0.119
+streamlit==1.23.1
