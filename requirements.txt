@@ -9,9 +9,7 @@ streamlit
 #Pillow>=7.1.2
 #ultralytics==8.0.139
 
-# pip install -r requirements.txt
-ultralytics
-streamlit
+
 
 # base ----------------------------------------
 matplotlib>=3.2.2
