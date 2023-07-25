@@ -1,6 +1,7 @@
 # latest versions as of 2023-06-27
 streamlit
 opencv-python-headless
+mesa
 numpy>=1.20
 torch>=1.7.0
 opencv-python>=4.6.0
