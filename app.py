@@ -15,6 +15,10 @@ def predict_with_yolov8(img):
     # Run inference on the image
     results = model(source)
 
+    # Display results
+    res_plotted = results[0].plot()
+    cv2.imshow("result", res_plotted)
+
     return results
 
 def main():
