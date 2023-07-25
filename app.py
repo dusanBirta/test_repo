@@ -1,5 +1,6 @@
 from ultralytics import YOLO
 import streamlit as st
+"""
 import base64
 import torch
 #from ultralytics import YOLO
@@ -56,3 +57,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+"""
