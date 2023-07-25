@@ -4,16 +4,15 @@ import base64
 import torch
 from PIL import Image
 import io
+import tempfile
+import os
 
-def predict_with_yolov8(img_bytes):
-    # Load YOLOv8 model with the weights file "best.pt"
-    model = YOLO(export="best.pt")
-
-    # Convert the image bytes to PIL image
-    pil_image = Image.open(io.BytesIO(img_bytes))
+def predict_with_yolov8(img_path):
+    # Load YOLOv8 model with the weights file "best.pt" and using the provided command-line arguments
+    model = YOLO(args=f"task=detect mode=predict model=best.pt source={img_path}")
 
     # Run inference on the image
-    results = model(pil_image)
+    results = model()
 
     return results
 
@@ -27,11 +26,19 @@ def main():
         # Read the image as bytes
         img_bytes = uploaded_file.read()
 
+        # Create a temporary file to save the uploaded image
+        temp_file = tempfile.NamedTemporaryFile(delete=False)
+        temp_file.close()
+
+        # Save the image bytes to the temporary file
+        with open(temp_file.name, "wb") as f:
+            f.write(img_bytes)
+
         # Display the uploaded image
         st.image(img_bytes, use_column_width=True, caption="Uploaded Image")
 
-        # Predict with YOLOv8
-        results = predict_with_yolov8(img_bytes)
+        # Predict with YOLOv8 using the temporary file path
+        results = predict_with_yolov8(temp_file.name)
 
         # Display YOLOv8 predictions
         if "pred" in results.names:
@@ -78,6 +85,9 @@ def main():
 
         # Display the custom HTML template for the click event
         st.components.v1.html(click_html, height=400, scrolling=False)
+
+        # Remove the temporary file after processing
+        os.remove(temp_file.name)
 
 if __name__ == "__main__":
     main()
