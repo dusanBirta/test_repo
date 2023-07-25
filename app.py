@@ -1,7 +1,8 @@
+from ultralytics import YOLO
 import streamlit as st
 import base64
 import torch
-from ultralytics import YOLO
+#from ultralytics import YOLO
 from PIL import Image
 
 def predict_with_yolov8(img_bytes):
