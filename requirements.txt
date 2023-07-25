@@ -3,4 +3,4 @@ streamlit
 opencv-python-headless
 numpy
 torch
-ultralytics
+ultralytics==8.0.139
