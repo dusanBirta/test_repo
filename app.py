@@ -20,19 +20,33 @@ def main():
         image = Image.open(uploaded_file)
         img_array = np.array(image)
 
-        # Convert the PIL Image to bytes
-        buffered = io.BytesIO()
-        image.save(buffered, format="PNG")
-        img_bytes = buffered.getvalue()
+        # Load custom YOLO model named "best.pt"
+        model = YOLO('best.pt')  # Adjust the path if necessary
 
-        # Display the uploaded image
-        #st.image(img_bytes, use_column_width=True, caption="Uploaded Image")
+        # Make predictions using the uploaded image
+        results = model(img_array)
+
+        # Extract the first (and only) result from the list
+        result = results[0]
+
+        # Process the result
+        boxes = result.boxes  # Boxes object for bbox outputs
+
+        for (x1, y1, x2, y2, conf, class_num) in boxes.data:
+            label = result.names[int(class_num)]
+            color = [int(c) for c in COLORS[int(class_num) % len(COLORS)]]  # Choose a color based on the class
+            cv2.rectangle(img_array, (int(x1), int(y1)), (int(x2), int(y2)), color, 2)
+            cv2.putText(img_array, label, (int(x1), int(y1) - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
+
+        # Convert the PIL Image to bytes
+        is_success, img_buffer = cv2.imencode(".png", img_array)
+        if is_success:
+            img_bytes = img_buffer.tobytes()
 
         # Custom HTML template for the click event
         click_html = f"""
         <div style="position: relative; display: inline-block;">
-            <img src="data:image/png;base64,{base64.b64encode(img_bytes).decode()}" alt="Image" width="400" height="400"
-                 onclick="handleClick(event)" onmousemove="handleMouseOver(event)">
+            <img src="data:image/png;base64,{base64.b64encode(img_bytes).decode()}" alt="Image" width="400" height="400">
         </div>
         <script>
             // Dictionary to store descriptions and coordinates
@@ -70,44 +84,6 @@ def main():
         # Display the custom HTML template for the click event
         st.components.v1.html(click_html, height=400, scrolling=False)
 
-        # Load custom YOLO model named "best.pt"
-        model = YOLO('best.pt')  # Adjust the path if necessary
-
-        # Make predictions using the uploaded image
-        results = model(img_array)
-
-        # Extract the first (and only) result from the list
-        result = results[0]
-
-        # Process the result
-        boxes = result.boxes  # Boxes object for bbox outputs
-        masks = result.masks  # Masks object for segmentation masks outputs
-        keypoints = result.keypoints  # Keypoints object for pose outputs
-        probs = result.probs  # Class probabilities for classification outputs
-
-        # Assuming results.pred[0] contains the bounding box information
-        #bounding_boxes = results.pred[0]
-        for (x1, y1, x2, y2, conf, class_num) in boxes.data:
-            label = result.names[int(class_num)]
-            color = [int(c) for c in COLORS[int(class_num) % len(COLORS)]]  # Choose a color based on the class
-            cv2.rectangle(img_array, (int(x1), int(y1)), (int(x2), int(y2)), color, 2)
-            cv2.putText(img_array, label, (int(x1), int(y1) - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
-
-        st.image(img_array, use_column_width=True, caption="YOLO Predictions")
-
-        # Since the results object is a list, extract the first result
-        #result = results[0]
-
-        # Render the images with bounding boxes
-        #display_img = result.orig_img  # Access the original image data
-
-        #st.image(display_img, use_column_width=True, caption="YOLO Predictions")
-
-        # For displaying crops
-        # This logic assumes `result.boxes.data` contains bounding box coordinates.
-        for i, (x1, y1, x2, y2, conf, class_num) in enumerate(boxes.data):
-            crop = img_array[int(y1):int(y2), int(x1):int(x2)]
-            st.image(crop, use_column_width=False, caption=f"Object {i+1}")
 
 # Define some colors for drawing bounding boxes
 COLORS = [(255, 0, 0), (0, 255, 0), (0, 0, 255), (255, 255, 0), (0, 255, 255), (255, 0, 255), (128, 128, 0), (0, 128, 128), (128, 0, 128)]
