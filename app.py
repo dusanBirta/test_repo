@@ -76,11 +76,14 @@ def main():
         # Make predictions using the uploaded image
         results = model(img_array)
 
+        # Extract the first (and only) result from the list
+        result = results_list[0]
+
         # Process the result
-        boxes = results.boxes  # Boxes object for bbox outputs
-        masks = results.masks  # Masks object for segmentation masks outputs
-        keypoints = results.keypoints  # Keypoints object for pose outputs
-        probs = results.probs  # Class probabilities for classification outputs
+        boxes = result.boxes  # Boxes object for bbox outputs
+        masks = result.masks  # Masks object for segmentation masks outputs
+        keypoints = result.keypoints  # Keypoints object for pose outputs
+        probs = result.probs  # Class probabilities for classification outputs
 
         # Assuming results.pred[0] contains the bounding box information
         #bounding_boxes = results.pred[0]
