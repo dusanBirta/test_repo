@@ -77,14 +77,14 @@ def main():
         results = model(img_array)
 
         # Process the result
-        boxes = result.boxes  # Boxes object for bbox outputs
-        masks = result.masks  # Masks object for segmentation masks outputs
-        keypoints = result.keypoints  # Keypoints object for pose outputs
-        probs = result.probs  # Class probabilities for classification outputs
+        boxes = results.boxes  # Boxes object for bbox outputs
+        masks = results.masks  # Masks object for segmentation masks outputs
+        keypoints = results.keypoints  # Keypoints object for pose outputs
+        probs = results.probs  # Class probabilities for classification outputs
 
         # Assuming results.pred[0] contains the bounding box information
         #bounding_boxes = results.pred[0]
-        for (x1, y1, x2, y2, conf, class_num) in boxes:
+        for (x1, y1, x2, y2, conf, class_num) in boxes.data:
             label = results.names[int(class_num)]
             color = [int(c) for c in COLORS[int(class_num) % len(COLORS)]]  # Choose a color based on the class
             cv2.rectangle(img_array, (int(x1), int(y1)), (int(x2), int(y2)), color, 2)
@@ -102,7 +102,7 @@ def main():
 
         # For displaying crops
         # This logic assumes `result.boxes.data` contains bounding box coordinates.
-        for i, (x1, y1, x2, y2, conf, class_num) in enumerate(result.boxes.data):
+        for i, (x1, y1, x2, y2, conf, class_num) in enumerate(boxes.data):
             crop = img_array[int(y1):int(y2), int(x1):int(x2)]
             st.image(crop, use_column_width=False, caption=f"Object {i+1}")
 
