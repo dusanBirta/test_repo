@@ -7,30 +7,6 @@ import os
 import cv2
 
 
-def predict_with_yolov8(img_bytes):
-    # Load the YOLOv8 model
-    model = YOLO('best.pt')
-
-    # Convert the image bytes to PIL image
-    pil_image = Image.open(img_bytes)
-
-    # Run YOLOv8 segmentation on the image
-    results = model.predict(pil_image,imgsz=500)
-
-    for result in results:                                         # iterate results
-        boxes = result.boxes.cpu().numpy()                         # get boxes on cpu in numpy
-        for box in boxes:                                          # iterate boxes
-            r = box.xyxy[0].astype(int)                            # get corner points as int
-            st.image(r)                                               # print boxes
-            st.image(cv2.rectangle(img, r[:2], r[2:], (255, 255, 255), 2))  # draw boxes on img
-
-
-    
-    # Get the path of the new image saved by YOLOv8
-    # Assuming inference[0] is the Results object
-    res_plotted = results[0].plot()[:, :, ::-1]
-    
-    return res_plotted
 
 def main():
     st.title("YOLOv8 Predictions with Mouse Click App")
@@ -88,9 +64,20 @@ def main():
         st.components.v1.html(click_html, height=400, scrolling=False)
 
         # Predict with YOLOv8
-        seg_result = predict_with_yolov8(uploaded_file)
+        model = YOLO('yolov8n-seg.pt')
+        results = model('https://ultralytics.com/images/bus.jpg', imgsz=640)
+        img = cv2.imread('bus.jpg')
+        img = cv2.resize(img, (480, 640))
+        
+        for result in results:
+            for mask in result.masks:
+                m = torch.squeeze(mask.data)
+                composite = torch.stack((m, m, m), 2)
+                tmp = img * composite.cpu().numpy().astype(np.uint8)
+                cv2.imshow("result", tmp)
+                cv2.waitKey(0)
 
-        st.image(seg_result, use_column_width=True,caption="YOLOv8 Predictions")
+        #st.image(seg_result, use_column_width=True,caption="YOLOv8 Predictions")
 
 if __name__ == "__main__":
     main()
