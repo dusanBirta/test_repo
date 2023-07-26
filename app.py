@@ -4,6 +4,7 @@ import base64
 from PIL import Image
 import io
 import os
+import cv2
 
 
 def predict_with_yolov8(img_bytes):
