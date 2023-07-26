@@ -1,30 +1,29 @@
 from ultralytics import YOLO
 import streamlit as st
 import base64
-import torch
 from PIL import Image
 import io
-import cv2
-import numpy as np
 
 def predict_with_yolov8(img_bytes):
-    # Load YOLO8 model with the weights file "best.pt"
-    model = YOLO("best.pt")
+    # Load the YOLOv8 model
+    model = YOLO('yolov8m-seg.pt')
 
     # Convert the image bytes to PIL image
     pil_image = Image.open(io.BytesIO(img_bytes))
 
-    # Convert PIL image to OpenCV format
-    image_np = np.array(pil_image)
-    image_np = cv2.cvtColor(image_np, cv2.COLOR_RGB2BGR)
+    # Save the PIL image temporarily for YOLOv8 prediction
+    pil_image.save("temp_image.jpg")
 
-    # Run inference on the image
-    results = model.predict(image_np)
+    # Run YOLOv8 segmentation on the image
+    result = model('temp_image.jpg', save=True, project="../Results/")
 
-    return results, pil_image
+    # Load the segmentation result image
+    seg_result = Image.open(result.imgs[0])
+
+    return seg_result
 
 def main():
-    st.title("YOLOv8 Predictions with Mouse Click App")
+    st.title("YOLOv8 Segmentation with Mouse Click App")
 
     # File uploader to get the image from the user
     uploaded_file = st.file_uploader("Upload an image", type=["jpg", "jpeg", "png"])
@@ -36,15 +35,11 @@ def main():
         # Display the uploaded image
         st.image(img_bytes, use_column_width=True, caption="Uploaded Image")
 
-        # Predict with YOLOv8 and get the results and PIL image
-        results, pil_image = predict_with_yolov8(img_bytes)
+        # Predict with YOLOv8 and get the segmentation result
+        seg_result = predict_with_yolov8(img_bytes)
 
-        # Display YOLOv8 predictions on the image
-        for result in results:
-            x, y, w, h, confidence, class_name = result
-            st.image(pil_image, use_column_width=True)
-            st.markdown(f"Class: {class_name}, Confidence: {confidence:.2f}")
-            st.markdown(f"Bounding Box: ({x:.2f}, {y:.2f}, {w:.2f}, {h:.2f})")
+        # Display YOLOv8 segmentation result
+        st.image(seg_result, use_column_width=True, caption="YOLOv8 Segmentation Result")
 
         # Custom HTML template for the click event
         click_html = f"""
