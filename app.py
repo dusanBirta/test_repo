@@ -74,10 +74,12 @@ def main():
         model = YOLO('best.pt')  # Adjust the path if necessary
 
         # Make predictions using the uploaded image
-        results = model(img_array, imgsz=640)
+        results = model(img_array)
 
-        # Display the image with bounding boxes
-        st.image(results.render()[0], use_column_width=True, caption="YOLO Predictions")
+        # Extracting the image with bounding boxes from results
+        display_img = results.imgs[0]  # Assuming results.imgs contains the image as a numpy array
+    
+        st.image(display_img, use_column_width=True, caption="YOLO Predictions")
 
         # Extract and display the objects within the bounding boxes
         for i, (x1, y1, x2, y2, conf, class_num) in enumerate(results.pred[0]):
