@@ -74,11 +74,17 @@ def main():
         model = YOLO('best.pt')  # Adjust the path if necessary
 
         # Make predictions using the uploaded image
-        results = model(img_array, imgsz=640)
+        results = model(img_array)
+
+        # Process the result
+        boxes = result.boxes  # Boxes object for bbox outputs
+        masks = result.masks  # Masks object for segmentation masks outputs
+        keypoints = result.keypoints  # Keypoints object for pose outputs
+        probs = result.probs  # Class probabilities for classification outputs
 
         # Assuming results.pred[0] contains the bounding box information
-        bounding_boxes = results.pred[0]
-        for (x1, y1, x2, y2, conf, class_num) in bounding_boxes:
+        #bounding_boxes = results.pred[0]
+        for (x1, y1, x2, y2, conf, class_num) in boxes:
             label = results.names[int(class_num)]
             color = [int(c) for c in COLORS[int(class_num) % len(COLORS)]]  # Choose a color based on the class
             cv2.rectangle(img_array, (int(x1), int(y1)), (int(x2), int(y2)), color, 2)
