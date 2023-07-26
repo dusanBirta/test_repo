@@ -77,7 +77,9 @@ def main():
         results = model(img_array, imgsz=640)
 
         # Render the images with bounding boxes
-        rendered_imgs = results.render()
+        st.write(type(results))  # This will display the type of the results object
+        st.write(results)  # This will display the content of the results object
+
         
         if rendered_imgs:
             display_img = rendered_imgs[0]
