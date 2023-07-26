@@ -4,22 +4,24 @@ import base64
 import torch
 from PIL import Image
 import io
-import tempfile
-import os
+import cv2
+import numpy as np
 
-def predict_with_yolov8(img):
-    # Load YOLOv8 model with the weights file "best.pt" and using the provided command-line arguments
-    model = YOLO(model='best.pt')
-    source = uploaded_file
+def predict_with_yolov8(img_bytes):
+    # Load YOLO8 model with the weights file "best.pt"
+    model = YOLO("best.pt")
+
+    # Convert the image bytes to PIL image
+    pil_image = Image.open(io.BytesIO(img_bytes))
+
+    # Convert PIL image to OpenCV format
+    image_np = np.array(pil_image)
+    image_np = cv2.cvtColor(image_np, cv2.COLOR_RGB2BGR)
 
     # Run inference on the image
-    results = model(source)
+    results = model.predict(image_np)
 
-    # Display results
-    res_plotted = results[0].plot()
-    cv2.imshow("result", res_plotted)
-
-    return results
+    return results, pil_image
 
 def main():
     st.title("YOLOv8 Predictions with Mouse Click App")
@@ -31,23 +33,18 @@ def main():
         # Read the image as bytes
         img_bytes = uploaded_file.read()
 
-        # Create a temporary file to save the uploaded image
-        temp_file = tempfile.NamedTemporaryFile(delete=False)
-        temp_file.close()
-
-        # Save the image bytes to the temporary file
-        with open(temp_file.name, "wb") as f:
-            f.write(img_bytes)
-
         # Display the uploaded image
         st.image(img_bytes, use_column_width=True, caption="Uploaded Image")
 
-        # Predict with YOLOv8 using the temporary file path
-        results = predict_with_yolov8(temp_file.name)
+        # Predict with YOLOv8 and get the results and PIL image
+        results, pil_image = predict_with_yolov8(img_bytes)
 
-        # Display YOLOv8 predictions
-        if "pred" in results.names:
-            st.image(results.pred[0].get_image(), use_column_width=True, caption="YOLOv8 Predictions")
+        # Display YOLOv8 predictions on the image
+        for result in results:
+            x, y, w, h, confidence, class_name = result
+            st.image(pil_image, use_column_width=True)
+            st.markdown(f"Class: {class_name}, Confidence: {confidence:.2f}")
+            st.markdown(f"Bounding Box: ({x:.2f}, {y:.2f}, {w:.2f}, {h:.2f})")
 
         # Custom HTML template for the click event
         click_html = f"""
@@ -90,9 +87,6 @@ def main():
 
         # Display the custom HTML template for the click event
         st.components.v1.html(click_html, height=400, scrolling=False)
-
-        # Remove the temporary file after processing
-        os.remove(temp_file.name)
 
 if __name__ == "__main__":
     main()
