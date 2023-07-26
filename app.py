@@ -21,8 +21,8 @@ def predict_with_yolov8(img_bytes):
         boxes = result.boxes.cpu().numpy()                         # get boxes on cpu in numpy
         for box in boxes:                                          # iterate boxes
             r = box.xyxy[0].astype(int)                            # get corner points as int
-            print(r)                                               # print boxes
-            cv2.rectangle(img, r[:2], r[2:], (255, 255, 255), 2)   # draw boxes on img
+            st.image(r)                                               # print boxes
+            st.image(cv2.rectangle(img, r[:2], r[2:], (255, 255, 255), 2))  # draw boxes on img
 
 
     
