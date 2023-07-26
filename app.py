@@ -15,15 +15,20 @@ def predict_with_yolov8(img_bytes):
     pil_image.save("temp_image.jpg")
 
     # Run YOLOv8 segmentation on the image
-    result = model('temp_image.jpg', save=True, imgsz=500)
+    results = model('temp_image.jpg', save=True, project="../Results/")
 
-    # Load the segmentation result image
-    seg_result = Image.open(result.imgs[0])
-
-    return seg_result
+    # Check if the result contains any images
+    if len(results.imgs) > 0:
+        # Access the first image's detection result
+        detection_result = results.imgs[0]
+        seg_result = Image.open(detection_result)
+        return seg_result
+    else:
+        st.error("Error: YOLOv8 segmentation failed. Please try another image.")
+        return None
 
 def main():
-    st.title("YOLOv8 Segmentation with Mouse Click App")
+    st.title("YOLOv8 Predictions with Mouse Click App")
 
     # File uploader to get the image from the user
     uploaded_file = st.file_uploader("Upload an image", type=["jpg", "jpeg", "png"])
@@ -34,12 +39,6 @@ def main():
 
         # Display the uploaded image
         st.image(img_bytes, use_column_width=True, caption="Uploaded Image")
-
-        # Predict with YOLOv8 and get the segmentation result
-        seg_result = predict_with_yolov8(img_bytes)
-
-        # Display YOLOv8 segmentation result
-        st.image(seg_result, use_column_width=True, caption="YOLOv8 Segmentation Result")
 
         # Custom HTML template for the click event
         click_html = f"""
@@ -82,6 +81,13 @@ def main():
 
         # Display the custom HTML template for the click event
         st.components.v1.html(click_html, height=400, scrolling=False)
+
+        # Predict with YOLOv8
+        seg_result = predict_with_yolov8(img_bytes)
+
+        # Display YOLOv8 predictions
+        if seg_result is not None:
+            st.image(seg_result, use_column_width=True, caption="YOLOv8 Predictions")
 
 if __name__ == "__main__":
     main()
