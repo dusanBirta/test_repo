@@ -77,7 +77,7 @@ def main():
         results = model(img_array)
 
         # Extract the first (and only) result from the list
-        result = results_list[0]
+        result = results[0]
 
         # Process the result
         boxes = result.boxes  # Boxes object for bbox outputs
