@@ -6,7 +6,7 @@ import io
 
 def predict_with_yolov8(img_bytes):
     # Load the YOLOv8 model
-    model = YOLO('yolov8m-seg.pt')
+    model = YOLO('best.pt')
 
     # Convert the image bytes to PIL image
     pil_image = Image.open(io.BytesIO(img_bytes))
