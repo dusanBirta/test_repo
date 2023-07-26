@@ -18,8 +18,10 @@ def main():
         image = Image.open(uploaded_file)
         img_array = np.array(image)
 
-        # Get image dimensions
+        # Get image dimensions and calculate display dimensions maintaining aspect ratio
         height, width = img_array.shape[:2]
+        display_width = 800  # Set a fixed width
+        display_height = int((display_width / width) * height)
 
         # Load custom YOLO model named "best.pt"
         model = YOLO('best.pt')
@@ -48,28 +50,30 @@ def main():
         # Custom HTML template for the click event
         click_html = f"""
         <div style="position: relative; display: inline-block;">
-            <img src="data:image/png;base64,{base64.b64encode(img_bytes).decode()}" alt="Image" width="{width}" height="{height}">
+            <img src="data:image/png;base64,{base64.b64encode(img_bytes).decode()}" alt="Image" width="{display_width}" height="{display_height}" onclick="handleClick(event)" onmousemove="handleMouseOver(event)">
         </div>
         <script>
             var descriptions = {{}};
             function handleClick(event) {{
-                var mouseX = event.clientX;
-                var mouseY = event.clientY;
+                var rect = event.target.getBoundingClientRect();
+                var mouseX = event.clientX - rect.left;
+                var mouseY = event.clientY - rect.top;
                 var description = prompt("Enter a description for this area:");
                 if (description) {{
                     descriptions[mouseX + '-' + mouseY] = description;
                 }}
             }}
             function handleMouseOver(event) {{
-                var mouseX = event.clientX;
-                var mouseY = event.clientY;
+                var rect = event.target.getBoundingClientRect();
+                var mouseX = event.clientX - rect.left;
+                var mouseY = event.clientY - rect.top;
                 var messageDiv = document.getElementById('message');
                 messageDiv.innerHTML = '';
                 for (var key in descriptions) {{
                     var coords = key.split('-');
-                    var distance = Math.sqrt((mouseX - coords[0]) ** 2 + (mouseY - coords[1]) ** 2);
+                    var distance = Math.sqrt((mouseX - parseFloat(coords[0])) ** 2 + (mouseY - parseFloat(coords[1])) ** 2);
                     if (distance <= 50) {{
-                        messageDiv.innerHTML += '<p style="position: absolute; left: ' + coords[0] + 'px; top: ' + coords[1] + 'px; background-color: #555; color: #fff; border-radius: 6px; padding: 5px;">' + descriptions[key] + '</p>';
+                        messageDiv.innerHTML += '<p style="position: absolute; left: ' + (rect.left + parseFloat(coords[0])) + 'px; top: ' + (rect.top + parseFloat(coords[1])) + 'px; background-color: #555; color: #fff; border-radius: 6px; padding: 5px;">' + descriptions[key] + '</p>';
                     }}
                 }}
             }}
@@ -77,7 +81,7 @@ def main():
         <div id="message" style="position: absolute; top: 0; left: 0;"></div>
         """
 
-        st.components.v1.html(click_html, height=height, scrolling=False)
+        st.components.v1.html(click_html, height=display_height, scrolling=False)
 
 # Define some colors for drawing bounding boxes
 COLORS = [(255, 0, 0), (0, 255, 0), (0, 0, 255), (255, 255, 0), (0, 255, 255), (255, 0, 255), (128, 128, 0), (0, 128, 128), (128, 0, 128)]
