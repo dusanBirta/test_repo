@@ -16,7 +16,7 @@ def predict_with_yolov8(img_bytes):
     # Run YOLOv8 segmentation on the image
     results = model.predict(pil_image,imgsz=500)
 
-    for result in seg_result:                                         # iterate results
+    for result in results:                                         # iterate results
         boxes = result.boxes.cpu().numpy()                         # get boxes on cpu in numpy
         for box in boxes:                                          # iterate boxes
             r = box.xyxy[0].astype(int)                            # get corner points as int
