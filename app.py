@@ -76,13 +76,22 @@ def main():
         # Make predictions using the uploaded image
         results = model(img_array, imgsz=640)
 
+        # Get bounding boxes, labels, and classes
+        for (x1, y1, x2, y2, conf, class_num) in results.boxes.data:
+            label = results.names[int(class_num)]
+            color = [int(c) for c in COLORS[int(class_num) % len(COLORS)]]  # Choose a color based on the class
+            cv2.rectangle(img_array, (int(x1), int(y1)), (int(x2), int(y2)), color, 2)
+            cv2.putText(img_array, label, (int(x1), int(y1) - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
+
+        st.image(img_array, use_column_width=True, caption="YOLO Predictions")
+
         # Since the results object is a list, extract the first result
-        result = results[0]
+        #result = results[0]
 
         # Render the images with bounding boxes
-        display_img = result.orig_img  # Access the original image data
+        #display_img = result.orig_img  # Access the original image data
 
-        st.image(display_img, use_column_width=True, caption="YOLO Predictions")
+        #st.image(display_img, use_column_width=True, caption="YOLO Predictions")
 
         # For displaying crops
         # This logic assumes `result.boxes.data` contains bounding box coordinates.
@@ -90,6 +99,8 @@ def main():
             crop = img_array[int(y1):int(y2), int(x1):int(x2)]
             st.image(crop, use_column_width=False, caption=f"Object {i+1}")
 
+# Define some colors for drawing bounding boxes
+COLORS = [(255, 0, 0), (0, 255, 0), (0, 0, 255), (255, 255, 0), (0, 255, 255), (255, 0, 255), (128, 128, 0), (0, 128, 128), (128, 0, 128)]
 
 if __name__ == "__main__":
     main()
