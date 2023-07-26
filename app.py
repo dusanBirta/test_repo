@@ -88,7 +88,7 @@ def main():
         # Assuming results.pred[0] contains the bounding box information
         #bounding_boxes = results.pred[0]
         for (x1, y1, x2, y2, conf, class_num) in boxes.data:
-            label = results.names[int(class_num)]
+            label = result.names[int(class_num)]
             color = [int(c) for c in COLORS[int(class_num) % len(COLORS)]]  # Choose a color based on the class
             cv2.rectangle(img_array, (int(x1), int(y1)), (int(x2), int(y2)), color, 2)
             cv2.putText(img_array, label, (int(x1), int(y1) - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
