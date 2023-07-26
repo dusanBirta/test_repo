@@ -3,7 +3,6 @@ import streamlit as st
 import base64
 from PIL import Image
 import io
-import os
 import cv2
 import torch
 import numpy as np
@@ -18,7 +17,13 @@ def main():
 
     if uploaded_file is not None:
         # Read the image as bytes
-        img_bytes = uploaded_file.read()
+        image = Image.open(uploaded_file)
+        img_array = np.array(image)
+
+        # Convert the PIL Image to bytes
+        buffered = io.BytesIO()
+        image.save(buffered, format="PNG")
+        img_bytes = buffered.getvalue()
 
         # Display the uploaded image
         #st.image(img_bytes, use_column_width=True, caption="Uploaded Image")
@@ -65,21 +70,19 @@ def main():
         # Display the custom HTML template for the click event
         st.components.v1.html(click_html, height=400, scrolling=False)
 
-        # Predict with YOLOv8
-        model = YOLO('yolov8n-seg.pt')
-        results = model('https://ultralytics.com/images/bus.jpg', imgsz=640)
-        img = cv2.imread('bus.jpg')
-        img = cv2.resize(img, (480, 640))
-        
-        for result in results:
-            for mask in result.masks:
-                m = torch.squeeze(mask.data)
-                composite = torch.stack((m, m, m), 2)
-                tmp = img * composite.cpu().numpy().astype(np.uint8)
-                cv2.imshow("result", tmp)
-                cv2.waitKey(0)
+        # Load custom YOLO model named "best.pt"
+        model = YOLO('best.pt')  # Adjust the path if necessary
 
-        #st.image(seg_result, use_column_width=True,caption="YOLOv8 Predictions")
+        # Make predictions using the uploaded image
+        results = model(img_array, imgsz=640)
+
+        # Display the image with bounding boxes
+        st.image(results.render()[0], use_column_width=True, caption="YOLO Predictions")
+
+        # Extract and display the objects within the bounding boxes
+        for i, (x1, y1, x2, y2, conf, class_num) in enumerate(results.pred[0]):
+            crop = img_array[int(y1):int(y2), int(x1):int(x2)]
+            st.image(crop, use_column_width=False, caption=f"Object {i+1}")
 
 if __name__ == "__main__":
     main()
