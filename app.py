@@ -76,20 +76,20 @@ def main():
         # Make predictions using the uploaded image
         results = model(img_array, imgsz=640)
 
+        # Since the results object is a list, extract the first result
+        result = results[0]
+
         # Render the images with bounding boxes
-        st.write(type(results))  # This will display the type of the results object
-        st.write(results)  # This will display the content of the results object
+        display_img = result.orig_img  # Access the original image data
 
-        
-        if rendered_imgs:
-            display_img = rendered_imgs[0]
-            st.image(display_img, use_column_width=True, caption="YOLO Predictions")
+        st.image(display_img, use_column_width=True, caption="YOLO Predictions")
 
-         # For displaying crops
-         # This logic assumes `results.pred[0]` contains bounding box coordinates.
-            for i, (x1, y1, x2, y2, conf, class_num) in enumerate(results.pred[0]):
-                crop = img_array[int(y1):int(y2), int(x1):int(x2)]
-                st.image(crop, use_column_width=False, caption=f"Object {i+1}")
+        # For displaying crops
+        # This logic assumes `result.boxes.tensor` contains bounding box coordinates.
+        for i, (x1, y1, x2, y2, conf, class_num) in enumerate(result.boxes.tensor):
+            crop = img_array[int(y1):int(y2), int(x1):int(x2)]
+            st.image(crop, use_column_width=False, caption=f"Object {i+1}")
+
 
 if __name__ == "__main__":
     main()
