@@ -1,3 +1,7 @@
-ultralytics
 streamlit
+ultralytics
+numpy
+PILLOW
 torch
+torchvision
+opencv-python
