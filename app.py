@@ -74,17 +74,20 @@ def main():
         model = YOLO('best.pt')  # Adjust the path if necessary
 
         # Make predictions using the uploaded image
-        results = model(img_array)
+        results = model(img_array, imgsz=640)
 
-        # Extracting the image with bounding boxes from results
-        display_img = results.imgs[0]  # Assuming results.imgs contains the image as a numpy array
-    
-        st.image(display_img, use_column_width=True, caption="YOLO Predictions")
+        # Render the images with bounding boxes
+        rendered_imgs = results.render()
+        
+        if rendered_imgs:
+            display_img = rendered_imgs[0]
+            st.image(display_img, use_column_width=True, caption="YOLO Predictions")
 
-        # Extract and display the objects within the bounding boxes
-        for i, (x1, y1, x2, y2, conf, class_num) in enumerate(results.pred[0]):
-            crop = img_array[int(y1):int(y2), int(x1):int(x2)]
-            st.image(crop, use_column_width=False, caption=f"Object {i+1}")
+         # For displaying crops
+         # This logic assumes `results.pred[0]` contains bounding box coordinates.
+            for i, (x1, y1, x2, y2, conf, class_num) in enumerate(results.pred[0]):
+                crop = img_array[int(y1):int(y2), int(x1):int(x2)]
+                st.image(crop, use_column_width=False, caption=f"Object {i+1}")
 
 if __name__ == "__main__":
     main()
