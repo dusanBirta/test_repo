@@ -85,8 +85,8 @@ def main():
         st.image(display_img, use_column_width=True, caption="YOLO Predictions")
 
         # For displaying crops
-        # This logic assumes `result.boxes.tensor` contains bounding box coordinates.
-        for i, (x1, y1, x2, y2, conf, class_num) in enumerate(result.boxes.tensor):
+        # This logic assumes `result.boxes.data` contains bounding box coordinates.
+        for i, (x1, y1, x2, y2, conf, class_num) in enumerate(result.boxes.data):
             crop = img_array[int(y1):int(y2), int(x1):int(x2)]
             st.image(crop, use_column_width=False, caption=f"Object {i+1}")
 
