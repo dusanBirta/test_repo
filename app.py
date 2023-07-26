@@ -2,30 +2,22 @@ from ultralytics import YOLO
 import streamlit as st
 import base64
 from PIL import Image
-import io
+from io import BytesIO
+
+# Import the YOLOv8 model
+#from yolov8 import YOLO
 
 def predict_with_yolov8(img_bytes):
-    # Load the YOLOv8 model
-    model = YOLO('best.pt')
+    # Load YOLOv8 model with the weights file "best.pt"
+    model = YOLO(weights="best.pt")
 
     # Convert the image bytes to PIL image
-    pil_image = Image.open(io.BytesIO(img_bytes))
+    pil_image = Image.open(BytesIO(img_bytes))
 
-    # Save the PIL image temporarily for YOLOv8 prediction
-    pil_image.save("temp_image.jpg")
+    # Run inference on the image
+    results = model(pil_image)
 
-    # Run YOLOv8 segmentation on the image
-    results = model('temp_image.jpg', save=True, project="../Results/")
-
-    # Check if the result contains any images
-    if len(results.imgs) > 0:
-        # Access the first image's detection result
-        detection_result = results.imgs[0]
-        seg_result = Image.open(detection_result)
-        return seg_result
-    else:
-        st.error("Error: YOLOv8 segmentation failed. Please try another image.")
-        return None
+    return results
 
 def main():
     st.title("YOLOv8 Predictions with Mouse Click App")
@@ -39,6 +31,13 @@ def main():
 
         # Display the uploaded image
         st.image(img_bytes, use_column_width=True, caption="Uploaded Image")
+
+        # Predict with YOLOv8
+        results = predict_with_yolov8(img_bytes)
+
+        # Display YOLOv8 predictions
+        if len(results.imgs) > 0:
+            st.image(results.imgs[0], use_column_width=True, caption="YOLOv8 Predictions")
 
         # Custom HTML template for the click event
         click_html = f"""
@@ -81,13 +80,6 @@ def main():
 
         # Display the custom HTML template for the click event
         st.components.v1.html(click_html, height=400, scrolling=False)
-
-        # Predict with YOLOv8
-        seg_result = predict_with_yolov8(img_bytes)
-
-        # Display YOLOv8 predictions
-        if seg_result is not None:
-            st.image(seg_result, use_column_width=True, caption="YOLOv8 Predictions")
 
 if __name__ == "__main__":
     main()
