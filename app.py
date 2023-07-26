@@ -15,7 +15,7 @@ def predict_with_yolov8(img_bytes):
     pil_image.save("temp_image.jpg")
 
     # Run YOLOv8 segmentation on the image
-    result = model('temp_image.jpg', save=True, project="/Results")
+    result = model('temp_image.jpg', save=True, imgsz=500)
 
     # Load the segmentation result image
     seg_result = Image.open(result.imgs[0])
