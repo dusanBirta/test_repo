@@ -53,7 +53,7 @@ def main():
                 var rect = event.target.getBoundingClientRect();
                 var mouseX = event.clientX - rect.left;
                 var mouseY = event.clientY - rect.top;
-                var description = prompt("Enter a description for this area:");
+                var description = prompt("Enter a price for this item:");
                 if (description) {{
                     descriptions[mouseX + '-' + mouseY] = description;
                 }}
