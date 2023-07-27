@@ -7,7 +7,7 @@ import cv2
 import numpy as np
 
 def main():
-    st.title("Snapdetect)
+    st.title("Snapdetect")
 
     # File uploader to get the image from the user
     uploaded_file = st.file_uploader("Upload an image", type=["jpg", "jpeg", "png"])
