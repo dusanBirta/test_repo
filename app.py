@@ -19,7 +19,7 @@ def main():
         height, width, _ = img_array.shape
         
         # Set display size
-        display_width = min(width, 1000)
+        display_width = 800
         display_height = int((display_width / width) * height)
 
         # Load custom YOLO model named "best.pt"
@@ -56,11 +56,11 @@ def main():
             var descriptions = {{}};
             var boxAreas = {box_areas};
 
-            var scalingFactorWidth = {display_width} / {width};
-            var scalingFactorHeight = {display_height} / {height};
+            var scalingFactorWidth = {width} / {display_width};
+            var scalingFactorHeight = {height} / {display_height};
 
             function adjustCoordinates(coord, isWidth) {{
-                return isWidth ? coord * scalingFactorWidth : coord * scalingFactorHeight;
+                return isWidth ? coord / scalingFactorWidth : coord / scalingFactorHeight;
             }}
 
             function isInsideBox(mouseX, mouseY, box) {{
@@ -68,8 +68,8 @@ def main():
             }}
 
             function handleClick(event) {{
-                var mouseX = event.clientX;
-                var mouseY = event.clientY;
+                var mouseX = event.offsetX;
+                var mouseY = event.offsetY;
                 
                 for (var i = 0; i < boxAreas.length; i++) {{
                     if (isInsideBox(mouseX, mouseY, boxAreas[i])) {{
@@ -83,17 +83,16 @@ def main():
             }}
 
             function handleMouseOver(event) {{
-                var mouseX = event.clientX;
-                var mouseY = event.clientY;
+                var mouseX = event.offsetX;
+                var mouseY = event.offsetY;
 
                 var messageDiv = document.getElementById('message');
                 messageDiv.innerHTML = '';
 
-                // Display descriptions for the hovered area
                 for (var key in descriptions) {{
                     var coords = key.split('-');
                     var distance = Math.sqrt((mouseX - coords[0]) ** 2 + (mouseY - coords[1]) ** 2);
-                    if (distance <= 50) {{  // Only display descriptions within a radius of 50 pixels
+                    if (distance <= 50) {{
                         messageDiv.innerHTML += '<p style="position: absolute; left: ' + coords[0] + 'px; top: ' + coords[1] + 'px; background-color: #555; color: #fff; border-radius: 6px; padding: 5px;">' + descriptions[key] + '</p>';
                     }}
                 }}
