@@ -2,7 +2,6 @@ from ultralytics import YOLO
 import streamlit as st
 import base64
 from PIL import Image
-import io
 import cv2
 import numpy as np
 
@@ -16,7 +15,6 @@ def main():
         img_array = np.array(image)
 
         model = YOLO('best.pt')
-
         results = model(img_array)
         result = results[0]
         boxes = result.boxes
@@ -24,7 +22,7 @@ def main():
         box_areas = []
         for (x1, y1, x2, y2, conf, class_num) in boxes.data:
             label = result.names[int(class_num)]
-            color = [128, 128, 128]  # Change to a more readable color
+            color = [128, 128, 128]
             cv2.rectangle(img_array, (int(x1), int(y1)), (int(x2), int(y2)), color, 3)
             cv2.putText(img_array, label, (int(x1), int(y1) - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.7, color, 2)
             box_areas.append([x1, y1, x2, y2])
@@ -34,27 +32,24 @@ def main():
             img_bytes = img_buffer.tobytes()
 
         box_areas_str = str(box_areas).replace(" ", "")
-        
+
         click_html = f"""
         <div style="position: relative; display: inline-block;">
             <img src="data:image/png;base64,{base64.b64encode(img_bytes).decode()}" alt="Image" style="max-width: 800px;" onclick="handleClick(event)">
         </div>
         <script>
-            var descriptions = {{}};
             var boxAreas = {box_areas_str};
 
             function handleClick(event) {{
-                console.log("Clicked");
                 var mouseX = event.offsetX;
                 var mouseY = event.offsetY;
 
                 for (var i = 0; i < boxAreas.length; i++) {{
                     var box = boxAreas[i];
                     if (mouseX >= box[0] && mouseX <= box[2] && mouseY >= box[1] && mouseY <= box[3]) {{
-                        console.log("Inside bounding box");
                         var description = prompt("Enter a description for this area:");
                         if (description) {{
-                            descriptions[mouseX + '-' + mouseY] = description;
+                            window.location.href = '/?description=' + description;
                         }}
                         break;
                     }}
@@ -64,6 +59,10 @@ def main():
         """
 
         st.components.v1.html(click_html, height=720, scrolling=False)
+
+        description = st.experimental_get_query_params().get('description')
+        if description:
+            st.write(f"Description added: {description[0]}")
 
 if __name__ == "__main__":
     main()
