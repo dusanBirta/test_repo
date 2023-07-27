@@ -20,7 +20,7 @@ def main():
 
         # Get image dimensions and calculate display dimensions maintaining aspect ratio
         height, width = img_array.shape[:2]
-        display_width = 780  # Reduced a bit to prevent cut-offs
+        display_width = 780  # Reduced to prevent cut-offs
         display_height = int((display_width / width) * height)
 
         # Load custom YOLO model named "best.pt"
@@ -28,15 +28,18 @@ def main():
 
         # Make predictions using the uploaded image
         results = model(img_array)
-        result = results[0]  # Extract the first result
+        result = results[0]
 
-        # Process the result and draw bounding boxes and labels
+        # Process the result
         boxes = result.boxes
+        box_areas = []  # List to store bounding box coordinates
+
         for (x1, y1, x2, y2, conf, class_num) in boxes.data:
             label = result.names[int(class_num)]
             color = [int(c) for c in COLORS[int(class_num) % len(COLORS)]]
             cv2.rectangle(img_array, (int(x1), int(y1)), (int(x2), int(y2)), color, 3)
-            cv2.putText(img_array, label, (int(x1), int(y1) - 10), cv2.FONT_HERSHEY_SIMPLEX, 1, color, 3)  # Increased font size
+            cv2.putText(img_array, label, (int(x1), int(y1) - 10), cv2.FONT_HERSHEY_SIMPLEX, 1, color, 3)
+            box_areas.append((x1, y1, x2, y2))
 
         # Convert the image array to bytes
         is_success, img_buffer = cv2.imencode(".png", img_array)
@@ -49,15 +52,28 @@ def main():
         </div>
         <script>
             var descriptions = {{}};
+            var boxAreas = {box_areas};
+
+            function isInsideBox(mouseX, mouseY, box) {{
+                return mouseX >= box[0] && mouseX <= box[2] && mouseY >= box[1] && mouseY <= box[3];
+            }}
+
             function handleClick(event) {{
                 var rect = event.target.getBoundingClientRect();
                 var mouseX = event.clientX - rect.left;
                 var mouseY = event.clientY - rect.top;
-                var description = prompt("Enter a description for this area:");
-                if (description) {{
-                    descriptions[mouseX + '-' + mouseY] = description;
+
+                for (var i = 0; i < boxAreas.length; i++) {{
+                    if (isInsideBox(mouseX, mouseY, boxAreas[i])) {{
+                        var description = prompt("Enter a description for this area:");
+                        if (description) {{
+                            descriptions[mouseX + '-' + mouseY] = description;
+                        }}
+                        break;
+                    }}
                 }}
             }}
+
             function handleMouseOver(event) {{
                 var rect = event.target.getBoundingClientRect();
                 var mouseX = event.clientX - rect.left;
