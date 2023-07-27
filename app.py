@@ -4,11 +4,10 @@ import base64
 from PIL import Image
 import io
 import cv2
-import torch
 import numpy as np
 
 def main():
-    st.title("Snapdetect")
+    st.title("Snapdetect)
 
     # File uploader to get the image from the user
     uploaded_file = st.file_uploader("Upload an image", type=["jpg", "jpeg", "png"])
@@ -17,35 +16,38 @@ def main():
         # Read the image as bytes
         image = Image.open(uploaded_file)
         img_array = np.array(image)
-
-        # Get image dimensions and calculate display dimensions maintaining aspect ratio
-        height, width = img_array.shape[:2]
-        display_width = 780  # Reduced to prevent cut-offs
+        height, width, _ = img_array.shape
+        
+        # Set display size
+        display_width = min(width, 1000)
         display_height = int((display_width / width) * height)
 
         # Load custom YOLO model named "best.pt"
-        model = YOLO('best.pt')
+        model = YOLO('best.pt')  # Adjust the path if necessary
 
         # Make predictions using the uploaded image
         results = model(img_array)
+
+        # Extract the first (and only) result from the list
         result = results[0]
 
         # Process the result
-        boxes = result.boxes
-        box_areas = []  # List to store bounding box coordinates
+        boxes = result.boxes  # Boxes object for bbox outputs
+        box_areas = []
 
         for (x1, y1, x2, y2, conf, class_num) in boxes.data:
             label = result.names[int(class_num)]
-            color = [int(c) for c in COLORS[int(class_num) % len(COLORS)]]
-            cv2.rectangle(img_array, (int(x1), int(y1)), (int(x2), int(y2)), color, 3)
-            cv2.putText(img_array, label, (int(x1), int(y1) - 10), cv2.FONT_HERSHEY_SIMPLEX, 1, color, 3)
-            box_areas.append((x1, y1, x2, y2))
+            color = [int(c) for c in COLORS[int(class_num) % len(COLORS)]]  # Choose a readable color based on the class
+            cv2.rectangle(img_array, (int(x1), int(y1)), (int(x2), int(y2)), color, 2)
+            cv2.putText(img_array, label, (int(x1), int(y1) - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.8, color, 2)
+            box_areas.append([x1, y1, x2, y2])
 
-        # Convert the image array to bytes
+        # Convert the PIL Image to bytes
         is_success, img_buffer = cv2.imencode(".png", img_array)
-        img_bytes = img_buffer.tobytes() if is_success else None
+        if is_success:
+            img_bytes = img_buffer.tobytes()
 
-        # Custom HTML template for click events
+        # Custom HTML template for the click event
         click_html = f"""
         <div style="position: relative; display: inline-block;">
             <img src="data:image/png;base64,{base64.b64encode(img_bytes).decode()}" alt="Image" width="{display_width}" height="{display_height}" onclick="handleClick(event)" onmousemove="handleMouseOver(event)">
@@ -54,15 +56,21 @@ def main():
             var descriptions = {{}};
             var boxAreas = {box_areas};
 
+            var scalingFactorWidth = {display_width} / {width};
+            var scalingFactorHeight = {display_height} / {height};
+
+            function adjustCoordinates(coord, isWidth) {{
+                return isWidth ? coord * scalingFactorWidth : coord * scalingFactorHeight;
+            }}
+
             function isInsideBox(mouseX, mouseY, box) {{
-                return mouseX >= box[0] && mouseX <= box[2] && mouseY >= box[1] && mouseY <= box[3];
+                return mouseX >= adjustCoordinates(box[0], true) && mouseX <= adjustCoordinates(box[2], true) && mouseY >= adjustCoordinates(box[1], false) && mouseY <= adjustCoordinates(box[3], false);
             }}
 
             function handleClick(event) {{
-                var rect = event.target.getBoundingClientRect();
-                var mouseX = event.clientX - rect.left;
-                var mouseY = event.clientY - rect.top;
-
+                var mouseX = event.clientX;
+                var mouseY = event.clientY;
+                
                 for (var i = 0; i < boxAreas.length; i++) {{
                     if (isInsideBox(mouseX, mouseY, boxAreas[i])) {{
                         var description = prompt("Enter a description for this area:");
@@ -75,16 +83,18 @@ def main():
             }}
 
             function handleMouseOver(event) {{
-                var rect = event.target.getBoundingClientRect();
-                var mouseX = event.clientX - rect.left;
-                var mouseY = event.clientY - rect.top;
+                var mouseX = event.clientX;
+                var mouseY = event.clientY;
+
                 var messageDiv = document.getElementById('message');
                 messageDiv.innerHTML = '';
+
+                // Display descriptions for the hovered area
                 for (var key in descriptions) {{
                     var coords = key.split('-');
-                    var distance = Math.sqrt((mouseX - parseFloat(coords[0])) ** 2 + (mouseY - parseFloat(coords[1])) ** 2);
-                    if (distance <= 50) {{
-                        messageDiv.innerHTML += '<p style="position: absolute; left: ' + (rect.left + parseFloat(coords[0])) + 'px; top: ' + (rect.top + parseFloat(coords[1])) + 'px; background-color: #555; color: #fff; border-radius: 6px; padding: 5px;">' + descriptions[key] + '</p>';
+                    var distance = Math.sqrt((mouseX - coords[0]) ** 2 + (mouseY - coords[1]) ** 2);
+                    if (distance <= 50) {{  // Only display descriptions within a radius of 50 pixels
+                        messageDiv.innerHTML += '<p style="position: absolute; left: ' + coords[0] + 'px; top: ' + coords[1] + 'px; background-color: #555; color: #fff; border-radius: 6px; padding: 5px;">' + descriptions[key] + '</p>';
                     }}
                 }}
             }}
@@ -92,10 +102,11 @@ def main():
         <div id="message" style="position: absolute; top: 0; left: 0;"></div>
         """
 
+        # Display the custom HTML template for the click event
         st.components.v1.html(click_html, height=display_height, scrolling=False)
 
-# Muted colors for bounding boxes
-COLORS = [(100, 100, 100), (150, 75, 0), (75, 0, 130), (0, 75, 75), (0, 100, 0), (100, 0, 0), (50, 50, 50), (0, 50, 50), (50, 0, 50)]
+# Define some readable colors for drawing bounding boxes
+COLORS = [(128, 128, 128), (50, 168, 82), (50, 82, 168), (168, 168, 50), (50, 168, 132), (168, 50, 132), (80, 80, 0), (0, 80, 80), (80, 0, 80)]
 
 if __name__ == "__main__":
     main()
