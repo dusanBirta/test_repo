@@ -20,7 +20,7 @@ def main():
 
         # Get image dimensions and calculate display dimensions maintaining aspect ratio
         height, width = img_array.shape[:2]
-        display_width = 800  # Set a fixed width
+        display_width = 780  # Reduced a bit to prevent cut-offs
         display_height = int((display_width / width) * height)
 
         # Load custom YOLO model named "best.pt"
@@ -28,26 +28,21 @@ def main():
 
         # Make predictions using the uploaded image
         results = model(img_array)
+        result = results[0]  # Extract the first result
 
-        # Extract the first (and only) result from the list
-        result = results[0]
-
-        # Process the result
+        # Process the result and draw bounding boxes and labels
         boxes = result.boxes
-
-        # Draw bounding boxes and labels
         for (x1, y1, x2, y2, conf, class_num) in boxes.data:
             label = result.names[int(class_num)]
             color = [int(c) for c in COLORS[int(class_num) % len(COLORS)]]
-            cv2.rectangle(img_array, (int(x1), int(y1)), (int(x2), int(y2)), color, 3)  # Increased thickness to 3
-            cv2.putText(img_array, label, (int(x1), int(y1) - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.8, color, 2)  # Increased font size and thickness
+            cv2.rectangle(img_array, (int(x1), int(y1)), (int(x2), int(y2)), color, 3)
+            cv2.putText(img_array, label, (int(x1), int(y1) - 10), cv2.FONT_HERSHEY_SIMPLEX, 1, color, 3)  # Increased font size
 
-        # Convert the PIL Image to bytes
+        # Convert the image array to bytes
         is_success, img_buffer = cv2.imencode(".png", img_array)
-        if is_success:
-            img_bytes = img_buffer.tobytes()
+        img_bytes = img_buffer.tobytes() if is_success else None
 
-        # Custom HTML template for the click event
+        # Custom HTML template for click events
         click_html = f"""
         <div style="position: relative; display: inline-block;">
             <img src="data:image/png;base64,{base64.b64encode(img_bytes).decode()}" alt="Image" width="{display_width}" height="{display_height}" onclick="handleClick(event)" onmousemove="handleMouseOver(event)">
@@ -83,8 +78,8 @@ def main():
 
         st.components.v1.html(click_html, height=display_height, scrolling=False)
 
-# Define some colors for drawing bounding boxes
-COLORS = [(255, 0, 0), (0, 255, 0), (0, 0, 255), (255, 255, 0), (0, 255, 255), (255, 0, 255), (128, 128, 0), (0, 128, 128), (128, 0, 128)]
+# Muted colors for bounding boxes
+COLORS = [(100, 100, 100), (150, 75, 0), (75, 0, 130), (0, 75, 75), (0, 100, 0), (100, 0, 0), (50, 50, 50), (0, 50, 50), (50, 0, 50)]
 
 if __name__ == "__main__":
     main()
