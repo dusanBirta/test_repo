@@ -8,7 +8,7 @@ import torch
 import numpy as np
 
 def main():
-    st.title("YOLOv8 Predictions with Mouse Click App")
+    st.title("Snapdetect")
 
     # File uploader to get the image from the user
     uploaded_file = st.file_uploader("Upload an image", type=["jpg", "jpeg", "png"])
