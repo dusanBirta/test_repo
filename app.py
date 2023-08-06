@@ -6,7 +6,7 @@ import os
 
 def enhance_image(input_image_path, output_image_path):
     # Enhance the image with Real-ESRGAN
-    enhance_command = f"/home/adminuser/venv/bin/python Real-ESRGAN/inference_realesrgan.py -n RealESRGAN_x4plus -i {input_image_path} --outscale 3.5 --face_enhance"
+    enhance_command = f"/home/adminuser/venv/bin/python Real-ESRGAN/inference_realesrgan.py -n RealESRGAN_x4plus -i ${input_image_path} --outscale 3.5 --face_enhance"
     os.system(enhance_command)
 
     # Read the enhanced image
