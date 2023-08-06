@@ -30,3 +30,4 @@ basicsr
 facexlib
 gfpgan
 #shutil
+tqdm
