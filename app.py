@@ -62,8 +62,7 @@ if uploaded_file is not None:
         generator, kp_detector = load_checkpoints(config_path='vox-256.yaml', checkpoint_path=model_path)
 
         # Generate animation
-        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        predictions = make_animation(source_image, driving_video, generator, kp_detector, relative=True, device=device)
+        predictions = make_animation(source_image, driving_video, generator, kp_detector, relative=True)
 
         # Save animation
         animation_path = 'output.mp4'
