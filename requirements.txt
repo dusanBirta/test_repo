@@ -20,4 +20,7 @@ matplotlib.animation
 skimage.transform
 IPython.display
 warnings
-
+demo
+skimage
+os
+base64
