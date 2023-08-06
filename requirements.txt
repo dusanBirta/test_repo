@@ -7,7 +7,7 @@ torchvision
 opencv-python
 requests
 imageio
-IPython.display
+#IPython.display
 base64
 os
 
