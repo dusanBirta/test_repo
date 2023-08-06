@@ -24,3 +24,14 @@ demo
 skimage
 os
 base64
+
+# ESRGAN Requirements
+basicsr
+facexlib
+gfpgan
+requests
+imageio
+IPython.display
+base64
+os
+shutil
