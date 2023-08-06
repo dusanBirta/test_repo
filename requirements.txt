@@ -20,7 +20,7 @@ ffmpeg
 gdown
 #matplotlib.pyplot
 #matplotlib.animation
-warnings
+#warnings
 demo
 skimage
 
