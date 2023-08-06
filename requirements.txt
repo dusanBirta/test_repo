@@ -13,6 +13,7 @@ imageio
 
 # Yolov8 Requirements
 ultralytics
+omegaconf
 
 # Animate Photo Requirements
 ffmpeg-python
