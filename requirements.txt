@@ -24,3 +24,4 @@ gdown
 #warnings
 #demo
 scikit-image
+git+https://github.com/NVIDIA/apex # for sync_batchnorm
