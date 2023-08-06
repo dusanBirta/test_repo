@@ -1,57 +1,50 @@
-# app.py
 import streamlit as st
 from ultralytics import YOLO
 from PIL import Image
 import cv2
-import numpy as np
+import os
+import shutil
+import subprocess
 
-# Display title and instruction
-st.title('Face Detection using YOLOv8')
-st.subheader('Upload an image to perform face detection')
-
-# Upload image
-uploaded_file = st.file_uploader('Choose an image...', type=['jpg', 'jpeg', 'png'])
+# YOLO face detection
+st.title("Face Detection and Enhancement")
+uploaded_file = st.file_uploader("Choose an image...", type="jpg")
 if uploaded_file is not None:
-    # Read the uploaded image
-    uploaded_image = Image.open(uploaded_file)
-    image_path = f'image_uploaded.{uploaded_file.type.split("/")[-1]}'
-    uploaded_image.save(image_path)
-
-    # Load YOLO model
+    # Convert the file to an opencv image.
+    image = Image.open(uploaded_file)
+    image_path = "input_image.jpg"
+    image.save(image_path)
     model = YOLO('yolov8n-face.pt')
-
-    # Predict with the model
     results = model(image_path)
+    im_array = results.render()[0]  # plot a BGR numpy array of predictions
+    im = Image.fromarray(im_array[..., ::-1])  # RGB PIL image
+    st.image(im, caption="Detected faces")
 
-    # Show the results
-    for r in results:
-        im_array = r.plot()  # plot a BGR numpy array of predictions
-        im = Image.fromarray(im_array[..., ::-1])  # RGB PIL image
-        st.image(im, caption='Detected faces')  # Show image in Streamlit
-
-    # Load the original image
+    face_counter = 0
     original_image = cv2.imread(image_path)
     original_image = cv2.cvtColor(original_image, cv2.COLOR_BGR2RGB)
-
-    # Counter for the face images
-    face_counter = 0
-
-    # Iterate through the detection results
     for result in results:
-        # Get bounding box coordinates in the xyxy format
         xyxy_boxes = result.boxes.xyxy
-
-        # Crop and display each bounding box
         for xyxy_box in xyxy_boxes:
-            # Convert the bounding box coordinates to integers
             x1, y1, x2, y2 = map(int, xyxy_box)
-
-            # Crop the image using the bounding box coordinates
             cropped_image = original_image[y1:y2, x1:x2]
+            face_path = f'face_{face_counter}.jpg'
+            cv2.imwrite(face_path, cv2.cvtColor(cropped_image, cv2.COLOR_RGB2BGR))
+            st.image(face_path, caption=f"Face {face_counter}")
 
-            # Convert cropped image to PIL Image and show in Streamlit
-            cropped_pil_image = Image.fromarray(cropped_image)
-            st.image(cropped_pil_image, caption=f'Face {face_counter}')
-
-            # Increment the face counter
+            # Enhance the face image using Real-ESRGAN
+            # Assuming Real-ESRGAN repository is cloned and set up properly
+            upload_folder = 'Real-ESRGAN/upload'
+            result_folder = 'Real-ESRGAN/results'
+            if os.path.isdir(upload_folder):
+                shutil.rmtree(upload_folder)
+            if os.path.isdir(result_folder):
+                shutil.rmtree(result_folder)
+            os.mkdir(upload_folder)
+            os.mkdir(result_folder)
+            dst_path = os.path.join(upload_folder, face_path)
+            shutil.move(face_path, dst_path)
+            subprocess.run(['python', 'Real-ESRGAN/inference_realesrgan.py', '-n', 'RealESRGAN_x4plus', '-i', upload_folder, '--outscale', '3.5', '--face_enhance'])
+            enhanced_face_path = os.path.join(result_folder, face_path)
+            st.image(enhanced_face_path, caption=f"Enhanced Face {face_counter}")
             face_counter += 1
