@@ -8,7 +8,7 @@ import subprocess
 
 # YOLO face detection
 st.title("Face Detection and Enhancement")
-uploaded_file = st.file_uploader("Choose an image...", type="jpg")
+uploaded_file = st.file_uploader('Choose an image...', type=['jpg', 'jpeg', 'png'])
 if uploaded_file is not None:
     # Convert the file to an opencv image.
     image = Image.open(uploaded_file)
