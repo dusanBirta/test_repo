@@ -18,8 +18,8 @@ ultralytics
 ffmpeg-python
 ffmpeg
 gdown
-matplotlib.pyplot
-matplotlib.animation
+#matplotlib.pyplot
+#matplotlib.animation
 warnings
 demo
 skimage
