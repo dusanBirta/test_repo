@@ -9,10 +9,10 @@ from skimage.transform import resize
 from demo import load_checkpoints, make_animation
 from skimage import img_as_ubyte
 import os
-import ffmpeg
 
 # Title
 st.title('Face Animation using YOLOv8 and First Order Motion Model')
+st.subheader('Due to streamlit only having CPU access, processing may take in excess of 5 mins to complete.')
 st.subheader('Upload an image to perform face animation')
 
 # Function to play video
@@ -37,24 +37,24 @@ if uploaded_file is not None:
     model = YOLO('yolov8n-face.pt')
     results = model(image_path)
 
-    cropped_faces = []
+    # Process results and display original image with bounding boxes
     for r in results:
-        im_array = r.plot()
+        im_array = r.plot()  # BGR numpy array of predictions
+        im = Image.fromarray(im_array[..., ::-1])  # Convert to RGB PIL image
+        st.image(im, caption="YOLO Prediction with Bounding Boxes")
+
         xyxy_boxes = r.boxes.xyxy
-        for box in xyxy_boxes:
-            x1, y1, x2, y2 = map(int, box)
-            cropped_faces.append(im_array[y1:y2, x1:x2, ::-1])
+        cropped_faces = [im_array[y1:y2, x1:x2, ::-1] for x1, y1, x2, y2 in xyxy_boxes.astype(int)] # Crop and convert to RGB
 
-    # Display YOLO detected faces
-    st.image([Image.fromarray(face[..., ::-1]) for face in cropped_faces], caption=["Face " + str(i) for i in range(len(cropped_faces))])
+    # Display cropped faces
+    st.image([Image.fromarray(face) for face in cropped_faces], caption=["Face " + str(i) for i in range(len(cropped_faces))])
 
-    selected_index = st.selectbox('Choose a face to animate:', range(len(cropped_faces)), 0)
-    selected_face = cropped_faces[selected_index]
+    # Select which face to animate
+    selected_face_index = st.selectbox("Select a face to animate", range(len(cropped_faces)))
+    selected_face = cropped_faces[selected_face_index]
 
     # Animate face
     source_image = resize(selected_face, (256, 256))[..., :3]
-
-    # You may want to replace this URL with a path to a local video file
     url = 'https://github.com/dusanBirta/Animate-Photos/raw/main/driving.mp4'
     driving_video_path = 'temp_driving_video.mp4'
     gdown.download(url, driving_video_path, quiet=False)
