@@ -22,7 +22,7 @@ from tempfile import NamedTemporaryFile
 if sys.version_info[0] < 3:
     raise Exception("You must use Python 3 or higher. Recommended version is Python 3.7")
 
-def load_checkpoints(config_path, checkpoint_path, cpu=False):
+def load_checkpoints(config_path, checkpoint_path, cpu=True):
 
     with open(config_path) as f:
         config = yaml.full_load(f)
@@ -55,7 +55,7 @@ def load_checkpoints(config_path, checkpoint_path, cpu=False):
     return generator, kp_detector
 
 
-def make_animation(source_image, driving_video, generator, kp_detector, relative=True, adapt_movement_scale=True, cpu=False):
+def make_animation(source_image, driving_video, generator, kp_detector, relative=True, adapt_movement_scale=True, cpu=True):
     with torch.no_grad():
         predictions = []
         source = torch.tensor(source_image[np.newaxis].astype(np.float32)).permute(0, 3, 1, 2)
@@ -78,7 +78,7 @@ def make_animation(source_image, driving_video, generator, kp_detector, relative
             predictions.append(np.transpose(out['prediction'].data.cpu().numpy(), [0, 2, 3, 1])[0])
     return predictions
 
-def find_best_frame(source, driving, cpu=False):
+def find_best_frame(source, driving, cpu=True):
     import face_alignment  # type: ignore (local file)
     from scipy.spatial import ConvexHull
 
