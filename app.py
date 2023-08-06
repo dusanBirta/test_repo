@@ -7,7 +7,7 @@ import os
 # Real-ESRGAN enhancement function
 def enhance_image(input_image_path, output_image_path):
     # Enhance the image with Real-ESRGAN
-    os.system(f'python Real-ESRGAN/inference_realesrgan.py -n RealESRGAN_x4plus -i {input_image_path} --outscale 3.5 --face_enhance')
+    os.system(f'/home/appuser/venv/bin/python Real-ESRGAN/inference_realesrgan.py -n RealESRGAN_x4plus -i {input_image_path} --outscale 3.5 --face_enhance')
 
     # Check if the enhanced image is saved
     if not os.path.exists(output_image_path):
