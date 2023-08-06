@@ -11,15 +11,18 @@ from skimage import img_as_ubyte
 import os
 import ffmpeg
 
-# Title
-st.title('Face Animation using YOLOv8 and First Order Motion Model')
-st.subheader('Upload an image to perform face animation')
-
 # Function to play video
 def play_video(video_path):
     video_file = open(video_path, 'rb')
     video_bytes = video_file.read()
     st.video(video_bytes)
+
+# Title
+st.title('Face Animation using YOLOv8 and First Order Motion Model')
+st.subheader('Upload an image to perform face animation')
+
+if 'step' not in st.session_state:
+    st.session_state.step = 1
 
 # Download the pre-trained model
 model_path = 'vox-adv-cpk.pth.tar'
@@ -33,25 +36,31 @@ if uploaded_file is not None:
     image_path = f'image_uploaded.{uploaded_file.type.split("/")[-1]}'
     uploaded_image.save(image_path)
 
-    # Load YOLO model
-    model = YOLO('yolov8n-face.pt')
-    results = model(image_path)
+    if st.session_state.step == 1:
+        # Load YOLO model
+        model = YOLO('yolov8n-face.pt')
+        results = model(image_path)
 
-    # Process results
-    for r in results:
-        im_array = r.plot()  # plot a BGR numpy array of predictions
-        im = Image.fromarray(im_array[..., ::-1])  # RGB PIL image
+        # Process results and crop detected face
+        for r in results:
+            im_array = r.plot()
+            im = Image.fromarray(im_array[..., ::-1])
+            result = results[0]
+            xyxy_boxes = result.boxes.xyxy
+            x1, y1, x2, y2 = map(int, xyxy_boxes[0])
+            cropped_image = im_array[y1:y2, x1:x2, ::-1]
 
-        # Crop detected face
-        result = results[0]
-        xyxy_boxes = result.boxes.xyxy
-        x1, y1, x2, y2 = map(int, xyxy_boxes[0]) # Using first face detected
-        cropped_image = im_array[y1:y2, x1:x2, ::-1]
+        # Display YOLO predictions
+        st.image(im, caption='YOLO prediction', channels='RGB')
+        st.image(cropped_image, caption='Cropped face detected by YOLO', channels='BGR')
 
-        # Animate face
+        if st.button('Animate'):
+            st.session_state.step = 2
+            st.experimental_rerun()
+
+    elif st.session_state.step == 2:
+        # Continue with animation
         source_image = resize(cropped_image, (256, 256))[..., :3]
-
-        # You may want to replace this URL with a path to a local video file
         url = 'https://github.com/dusanBirta/Animate-Photos/raw/main/driving.mp4'
         driving_video_path = 'temp_driving_video.mp4'
         gdown.download(url, driving_video_path, quiet=False)
