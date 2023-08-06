@@ -28,4 +28,4 @@ scikit-image
 basicsr
 facexlib
 gfpgan
-shutil
+#shutil
