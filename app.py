@@ -9,8 +9,17 @@ def enhance_image(input_image_path, output_image_path):
     # Enhance the image with Real-ESRGAN
     os.system(f'python Real-ESRGAN/inference_realesrgan.py -n RealESRGAN_x4plus -i {input_image_path} --outscale 3.5 --face_enhance')
 
+    # Check if the enhanced image is saved
+    if not os.path.exists(output_image_path):
+        st.error(f"Enhanced image not found at {output_image_path}")
+        return None
+
     # Read the enhanced image
     enhanced_image = cv2.imread(output_image_path)
+    if enhanced_image is None:
+        st.error(f"Failed to read enhanced image from {output_image_path}")
+        return None
+
     enhanced_image = cv2.cvtColor(enhanced_image, cv2.COLOR_BGR2RGB)
     return enhanced_image
 
