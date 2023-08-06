@@ -2,12 +2,10 @@ import streamlit as st
 from ultralytics import YOLO
 from PIL import Image
 import cv2
+import numpy as np
 import os
 
 def enhance_image(input_image_path, output_image_path):
-    # Set the current working directory to Real-ESRGAN
-    os.chdir("Real-ESRGAN")
-    
     # Enhance the image with Real-ESRGAN
     enhance_command = f"/home/adminuser/venv/bin/python -m inference_realesrgan -n RealESRGAN_x4plus -i ${input_image_path} --outscale 3.5 --face_enhance"
     os.system(enhance_command)
@@ -16,13 +14,10 @@ def enhance_image(input_image_path, output_image_path):
     enhanced_image = cv2.imread(output_image_path)
     enhanced_image = cv2.cvtColor(enhanced_image, cv2.COLOR_BGR2RGB)
     
-    # Change the working directory back to the root
-    os.chdir("..")
-    
     return enhanced_image
 
-# Main app
-st.title('Face Detection using YOLOv8 and Real-ESRGAN Enhancement')
+# Display title and instruction
+st.title('Face Detection and Enhancement using YOLOv8 and Real-ESRGAN')
 st.subheader('Upload an image to perform face detection and enhancement')
 
 # Upload image
@@ -38,6 +33,12 @@ if uploaded_file is not None:
 
     # Predict with the model
     results = model(image_path)
+
+    # Show the results
+    for r in results:
+        im_array = r.plot()  # plot a BGR numpy array of predictions
+        im = Image.fromarray(im_array[..., ::-1])  # RGB PIL image
+        st.image(im, caption='Detected faces')  # Show image in Streamlit
 
     # Load the original image
     original_image = cv2.imread(image_path)
@@ -58,13 +59,20 @@ if uploaded_file is not None:
 
             # Crop the image using the bounding box coordinates
             cropped_image = original_image[y1:y2, x1:x2]
-            cropped_image_path = f'Real-ESRGAN/cropped_face_{face_counter}.jpg'
-            cv2.imwrite(cropped_image_path, cropped_image)
 
-            # Enhance the cropped face image
-            enhanced_image_path = f'Real-ESRGAN/results/cropped_face_{face_counter}_out.jpg'
+            # Save the cropped image
+            cropped_image_path = f'cropped_face_{face_counter}.png'
+            cv2.imwrite(cropped_image_path, cv2.cvtColor(cropped_image, cv2.COLOR_RGB2BGR))
+
+            # Define the enhanced image path
+            enhanced_image_path = cropped_image_path.replace('.png', '_out.jpg')
+
+            # Enhance the cropped image
             enhanced_image = enhance_image(cropped_image_path, enhanced_image_path)
 
-            # Show the original and enhanced face images in Streamlit
-            st.image([cropped_image, enhanced_image], caption=['Original Face', 'Enhanced Face'])
+            # Convert enhanced image to PIL Image and show in Streamlit
+            enhanced_pil_image = Image.fromarray(enhanced_image)
+            st.image(enhanced_pil_image, caption=f'Enhanced Face {face_counter}')
+
+            # Increment the face counter
             face_counter += 1
