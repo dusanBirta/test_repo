@@ -9,7 +9,7 @@ requests
 imageio
 #IPython.display
 #base64
-os
+#os
 
 # Yolov8 Requirements
 ultralytics
