@@ -13,7 +13,6 @@ import ffmpeg
 
 # Title
 st.title('Face Animation using YOLOv8 and First Order Motion Model')
-st.subheader('Due to streamlit only having CPU access, processing may take in excess of 5 minutes to complete')
 st.subheader('Upload an image to perform face animation')
 
 # Function to play video
@@ -38,39 +37,39 @@ if uploaded_file is not None:
     model = YOLO('yolov8n-face.pt')
     results = model(image_path)
 
-    # Process results
+    cropped_faces = []
     for r in results:
-        im_array = r.plot()  # Get BGR numpy array of predictions
-        im = Image.fromarray(im_array[..., ::-1])  # Convert to RGB PIL image
-        st.image(im, caption="YOLO Prediction", use_column_width=True)  # Display prediction
+        im_array = r.plot()
+        xyxy_boxes = r.boxes.xyxy
+        for box in xyxy_boxes:
+            x1, y1, x2, y2 = map(int, box)
+            cropped_faces.append(im_array[y1:y2, x1:x2, ::-1])
 
-        # Crop detected faces
-        xyxy_boxes = r.boxes.xyxy.cpu().numpy()  # Convert tensor to NumPy array
-        cropped_faces = [im_array[y1:y2, x1:x2, ::-1] for x1, y1, x2, y2 in xyxy_boxes.astype(int)] # Crop and convert to RGB
+    # Display YOLO detected faces
+    st.image([Image.fromarray(face[..., ::-1]) for face in cropped_faces], caption=["Face " + str(i) for i in range(len(cropped_faces))])
 
-        # Display cropped faces
-        for idx, face in enumerate(cropped_faces):
-            st.image(face, caption=f"Cropped Face {idx + 1}", use_column_width=True)
+    selected_index = st.selectbox('Choose a face to animate:', range(len(cropped_faces)), 0)
+    selected_face = cropped_faces[selected_index]
 
-        # Allow user to select which cropped image to animate
-        selected_face_idx = st.selectbox('Select a face to animate:', range(len(cropped_faces)))
-        source_image = resize(cropped_faces[selected_face_idx], (256, 256))[..., :3]
+    # Animate face
+    source_image = resize(selected_face, (256, 256))[..., :3]
 
-        # Driving video path
-        driving_video_path = 'driving.mp4'
+    # You may want to replace this URL with a path to a local video file
+    url = 'https://github.com/dusanBirta/Animate-Photos/raw/main/driving.mp4'
+    driving_video_path = 'temp_driving_video.mp4'
+    gdown.download(url, driving_video_path, quiet=False)
+    reader = imageio.get_reader(driving_video_path)
+    driving_video = [resize(frame, (256, 256))[..., :3] for frame in reader]
 
-        reader = imageio.get_reader(driving_video_path)
-        driving_video = [resize(frame, (256, 256))[..., :3] for frame in reader]
+    # Load checkpoints
+    generator, kp_detector = load_checkpoints(config_path='vox-256.yaml', checkpoint_path=model_path)
 
-        # Load checkpoints
-        generator, kp_detector = load_checkpoints(config_path='vox-256.yaml', checkpoint_path=model_path)
+    # Generate animation
+    predictions = make_animation(source_image, driving_video, generator, kp_detector, relative=True)
 
-        # Generate animation
-        predictions = make_animation(source_image, driving_video, generator, kp_detector, relative=True)
+    # Save animation
+    animation_path = 'output.mp4'
+    imageio.mimsave(animation_path, [img_as_ubyte(frame) for frame in predictions], fps=20)
 
-        # Save animation
-        animation_path = 'output.mp4'
-        imageio.mimsave(animation_path, [img_as_ubyte(frame) for frame in predictions], fps=20)
-
-        # Display animation
-        play_video(animation_path)
+    # Display animation
+    play_video(animation_path)
