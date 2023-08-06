@@ -63,6 +63,7 @@ def load_checkpoints(config_path, checkpoint_path, cpu=False):
 
 
 def make_animation(source_image, driving_video, generator, kp_detector, relative=True, adapt_movement_scale=True, cpu=False):
+    #changed
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     with torch.no_grad():
         predictions = []
@@ -77,7 +78,8 @@ def make_animation(source_image, driving_video, generator, kp_detector, relative
         for frame_idx in tqdm(range(driving.shape[2])):
             driving_frame = driving[:, :, frame_idx]
             if not cpu:
-                driving_frame = driving_frame.cuda()
+                #changed
+                driving_frame = driving_frame.to(device)
             kp_driving = kp_detector(driving_frame)
             kp_norm = normalize_kp(kp_source=kp_source, kp_driving=kp_driving,
                                    kp_driving_initial=kp_driving_initial, use_relative_movement=relative,
