@@ -22,7 +22,7 @@ gdown
 #matplotlib.animation
 #warnings
 #demo
-skimage
+scikit-image
 
 # ESRGAN Requirements
 basicsr
