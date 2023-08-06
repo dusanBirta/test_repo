@@ -24,11 +24,3 @@ gdown
 #warnings
 #demo
 scikit-image
-
-# ESRGAN Requirements
-basicsr
-facexlib
-gfpgan
-#shutil
-tqdm
-opencv-python-headless
