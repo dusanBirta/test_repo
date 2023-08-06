@@ -31,3 +31,4 @@ facexlib
 gfpgan
 #shutil
 tqdm
+opencv-python-headless
