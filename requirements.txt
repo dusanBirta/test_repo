@@ -1,7 +1,23 @@
+# General Requirements
 streamlit
-ultralytics
 numpy
 PILLOW
 torch
 torchvision
 opencv-python
+
+# Yolov8 Requirements
+ultralytics
+
+# Animate Photo Requirements
+ffmpeg-python
+ffmpeg
+gdown
+import imageio
+import requests
+matplotlib.pyplot
+matplotlib.animation
+skimage.transform
+IPython.display
+warnings
+
