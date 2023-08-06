@@ -24,30 +24,23 @@ if sys.version_info[0] < 3:
 
 def load_checkpoints(config_path, checkpoint_path, cpu=False):
 
-    # Changed
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
-
     with open(config_path) as f:
         config = yaml.full_load(f)
 
     generator = OcclusionAwareGenerator(**config['model_params']['generator_params'],
                                         **config['model_params']['common_params'])
     if not cpu:
-        #changed
-        generator.to(device)
+        generator.cuda()
 
     kp_detector = KPDetector(**config['model_params']['kp_detector_params'],
                              **config['model_params']['common_params'])
     if not cpu:
-        #changed
-        kp_detector.to(device)
+        kp_detector.cuda()
 
     if cpu:
         checkpoint = torch.load(checkpoint_path, map_location=torch.device('cpu'))
     else:
-        # changed
-        checkpoint = torch.load(checkpoint_path, map_location=device) # Change this line
+        checkpoint = torch.load(checkpoint_path)
 
     generator.load_state_dict(checkpoint['generator'])
     kp_detector.load_state_dict(checkpoint['kp_detector'])
@@ -63,14 +56,11 @@ def load_checkpoints(config_path, checkpoint_path, cpu=False):
 
 
 def make_animation(source_image, driving_video, generator, kp_detector, relative=True, adapt_movement_scale=True, cpu=False):
-    #changed
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     with torch.no_grad():
         predictions = []
         source = torch.tensor(source_image[np.newaxis].astype(np.float32)).permute(0, 3, 1, 2)
         if not cpu:
-            #changed
-            source = source.to(device)
+            source = source.cuda()
         driving = torch.tensor(np.array(driving_video)[np.newaxis].astype(np.float32)).permute(0, 4, 1, 2, 3)
         kp_source = kp_detector(source)
         kp_driving_initial = kp_detector(driving[:, :, 0])
@@ -78,8 +68,7 @@ def make_animation(source_image, driving_video, generator, kp_detector, relative
         for frame_idx in tqdm(range(driving.shape[2])):
             driving_frame = driving[:, :, frame_idx]
             if not cpu:
-                #changed
-                driving_frame = driving_frame.to(device)
+                driving_frame = driving_frame.cuda()
             kp_driving = kp_detector(driving_frame)
             kp_norm = normalize_kp(kp_source=kp_source, kp_driving=kp_driving,
                                    kp_driving_initial=kp_driving_initial, use_relative_movement=relative,
