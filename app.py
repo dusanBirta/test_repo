@@ -37,39 +37,36 @@ if uploaded_file is not None:
     model = YOLO('yolov8n-face.pt')
     results = model(image_path)
 
-    cropped_faces = []
+    # Process results
     for r in results:
-        im_array = r.plot()
-        xyxy_boxes = r.boxes.xyxy
-        for box in xyxy_boxes:
-            x1, y1, x2, y2 = map(int, box)
-            cropped_faces.append(im_array[y1:y2, x1:x2, ::-1])
+        im_array = r.plot()  # plot a BGR numpy array of predictions
+        im = Image.fromarray(im_array[..., ::-1])  # RGB PIL image
 
-    # Display YOLO detected faces
-    st.image([Image.fromarray(face[..., ::-1]) for face in cropped_faces], caption=["Face " + str(i) for i in range(len(cropped_faces))])
+        # Crop detected face
+        result = results[0]
+        xyxy_boxes = result.boxes.xyxy
+        x1, y1, x2, y2 = map(int, xyxy_boxes[0]) # Using first face detected
+        cropped_image = im_array[y1:y2, x1:x2, ::-1]
 
-    selected_index = st.selectbox('Choose a face to animate:', range(len(cropped_faces)), 0)
-    selected_face = cropped_faces[selected_index]
+        # Animate face
+        source_image = resize(cropped_image, (256, 256))[..., :3]
 
-    # Animate face
-    source_image = resize(selected_face, (256, 256))[..., :3]
+        # You may want to replace this URL with a path to a local video file
+        url = 'https://github.com/dusanBirta/Animate-Photos/raw/main/driving.mp4'
+        driving_video_path = 'temp_driving_video.mp4'
+        gdown.download(url, driving_video_path, quiet=False)
+        reader = imageio.get_reader(driving_video_path)
+        driving_video = [resize(frame, (256, 256))[..., :3] for frame in reader]
 
-    # You may want to replace this URL with a path to a local video file
-    url = 'https://github.com/dusanBirta/Animate-Photos/raw/main/driving.mp4'
-    driving_video_path = 'temp_driving_video.mp4'
-    gdown.download(url, driving_video_path, quiet=False)
-    reader = imageio.get_reader(driving_video_path)
-    driving_video = [resize(frame, (256, 256))[..., :3] for frame in reader]
+        # Load checkpoints
+        generator, kp_detector = load_checkpoints(config_path='vox-256.yaml', checkpoint_path=model_path)
 
-    # Load checkpoints
-    generator, kp_detector = load_checkpoints(config_path='vox-256.yaml', checkpoint_path=model_path)
+        # Generate animation
+        predictions = make_animation(source_image, driving_video, generator, kp_detector, relative=True)
 
-    # Generate animation
-    predictions = make_animation(source_image, driving_video, generator, kp_detector, relative=True)
+        # Save animation
+        animation_path = 'output.mp4'
+        imageio.mimsave(animation_path, [img_as_ubyte(frame) for frame in predictions], fps=20)
 
-    # Save animation
-    animation_path = 'output.mp4'
-    imageio.mimsave(animation_path, [img_as_ubyte(frame) for frame in predictions], fps=20)
-
-    # Display animation
-    play_video(animation_path)
+        # Display animation
+        play_video(animation_path)
