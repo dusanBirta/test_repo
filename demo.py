@@ -46,7 +46,8 @@ def load_checkpoints(config_path, checkpoint_path, cpu=False):
     if cpu:
         checkpoint = torch.load(checkpoint_path, map_location=torch.device('cpu'))
     else:
-        checkpoint = torch.load(checkpoint_path)
+        # changed
+        checkpoint = torch.load(checkpoint_path, map_location=device) # Change this line
 
     generator.load_state_dict(checkpoint['generator'])
     kp_detector.load_state_dict(checkpoint['kp_detector'])
