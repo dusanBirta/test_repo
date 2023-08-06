@@ -33,7 +33,7 @@ if uploaded_file is not None:
     original_image = np.array(uploaded_image)
     image_path = f'image_uploaded.{uploaded_file.type.split("/")[-1]}'
     uploaded_image.save(image_path)
-
+    
     # Load YOLO model
     model = YOLO('yolov8n-face.pt')
     results = model(image_path)
@@ -46,25 +46,25 @@ if uploaded_file is not None:
     cropped_pil_image = Image.fromarray(cropped_image)
     st.image(cropped_pil_image, caption='Cropped Face')
 
-        # Animate face
-        source_image = resize(cropped_image, (256, 256))[..., :3]
+    # Animate face
+    source_image = resize(cropped_image, (256, 256))[..., :3]
 
-        # You may want to replace this URL with a path to a local video file
-        url = 'https://github.com/dusanBirta/Animate-Photos/raw/main/driving.mp4'
-        driving_video_path = 'temp_driving_video.mp4'
-        gdown.download(url, driving_video_path, quiet=False)
-        reader = imageio.get_reader(driving_video_path)
-        driving_video = [resize(frame, (256, 256))[..., :3] for frame in reader]
+    # You may want to replace this URL with a path to a local video file
+    url = 'https://github.com/dusanBirta/Animate-Photos/raw/main/driving.mp4'
+    driving_video_path = 'temp_driving_video.mp4'
+    gdown.download(url, driving_video_path, quiet=False)
+    reader = imageio.get_reader(driving_video_path)
+    driving_video = [resize(frame, (256, 256))[..., :3] for frame in reader]
 
-        # Load checkpoints
-        generator, kp_detector = load_checkpoints(config_path='vox-256.yaml', checkpoint_path=model_path)
+    # Load checkpoints
+    generator, kp_detector = load_checkpoints(config_path='vox-256.yaml', checkpoint_path=model_path)
 
-        # Generate animation
-        predictions = make_animation(source_image, driving_video, generator, kp_detector, relative=True)
+    # Generate animation
+    predictions = make_animation(source_image, driving_video, generator, kp_detector, relative=True)
 
-        # Save animation
-        animation_path = 'output.mp4'
-        imageio.mimsave(animation_path, [img_as_ubyte(frame) for frame in predictions], fps=20)
+    # Save animation
+    animation_path = 'output.mp4'
+    imageio.mimsave(animation_path, [img_as_ubyte(frame) for frame in predictions], fps=20)
 
-        # Display animation
-        play_video(animation_path)
+    # Display animation
+    play_video(animation_path)
