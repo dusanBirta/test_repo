@@ -4,6 +4,7 @@ from PIL import Image
 import cv2
 import numpy as np
 import os
+#test
 
 def enhance_image(input_image_path, output_image_path):
     # Enhance the image with Real-ESRGAN
