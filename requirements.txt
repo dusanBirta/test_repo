@@ -29,4 +29,5 @@ scikit-image
 basicsr
 facexlib
 gfpgan
+opencv-python-headless
 #shutil
