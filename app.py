@@ -5,13 +5,20 @@ import cv2
 import os
 
 def enhance_image(input_image_path, output_image_path):
+    # Set the current working directory to Real-ESRGAN
+    os.chdir("Real-ESRGAN")
+    
     # Enhance the image with Real-ESRGAN
-    enhance_command = f"/home/adminuser/venv/bin/python Real-ESRGAN/inference_realesrgan.py -n RealESRGAN_x4plus -i ${input_image_path} --outscale 3.5 --face_enhance"
+    enhance_command = f"/home/adminuser/venv/bin/python -m inference_realesrgan -n RealESRGAN_x4plus -i ${input_image_path} --outscale 3.5 --face_enhance"
     os.system(enhance_command)
 
     # Read the enhanced image
     enhanced_image = cv2.imread(output_image_path)
     enhanced_image = cv2.cvtColor(enhanced_image, cv2.COLOR_BGR2RGB)
+    
+    # Change the working directory back to the root
+    os.chdir("..")
+    
     return enhanced_image
 
 # Main app
