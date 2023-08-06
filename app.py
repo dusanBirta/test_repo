@@ -13,7 +13,7 @@ import ffmpeg
 
 # Title
 st.title('Face Animation using YOLOv8 and First Order Motion Model')
-st.subheader('Upload an image to perform face animation')
+st.subheader('Due to streamlit only having CPU access, processing may take in excess of 5 mins to complete')
 
 # Function to play video
 def play_video(video_path):
@@ -30,23 +30,21 @@ if not os.path.exists(model_path):
 uploaded_file = st.file_uploader('Choose an image...', type=['jpg', 'jpeg', 'png'])
 if uploaded_file is not None:
     uploaded_image = Image.open(uploaded_file)
+    original_image = np.array(uploaded_image)
     image_path = f'image_uploaded.{uploaded_file.type.split("/")[-1]}'
     uploaded_image.save(image_path)
 
     # Load YOLO model
     model = YOLO('yolov8n-face.pt')
     results = model(image_path)
+    result = results[0]
+    xyxy_boxes = result.boxes.xyxy
+    x1, y1, x2, y2 = map(int, xyxy_boxes[0]) # Using first face detected
+    cropped_image = original_image[y1:y2, x1:x2]
 
-    # Process results
-    for r in results:
-        im_array = r.plot()  # plot a BGR numpy array of predictions
-        im = Image.fromarray(im_array[..., ::-1])  # RGB PIL image
-
-        # Crop detected face
-        result = results[0]
-        xyxy_boxes = result.boxes.xyxy
-        x1, y1, x2, y2 = map(int, xyxy_boxes[0]) # Using first face detected
-        cropped_image = im_array[y1:y2, x1:x2, ::-1]
+    # Display the cropped face without bounding box
+    cropped_pil_image = Image.fromarray(cropped_image)
+    st.image(cropped_pil_image, caption='Cropped Face')
 
         # Animate face
         source_image = resize(cropped_image, (256, 256))[..., :3]
