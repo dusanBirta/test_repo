@@ -24,18 +24,24 @@ if sys.version_info[0] < 3:
 
 def load_checkpoints(config_path, checkpoint_path, cpu=False):
 
+    # Changed
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+
     with open(config_path) as f:
         config = yaml.full_load(f)
 
     generator = OcclusionAwareGenerator(**config['model_params']['generator_params'],
                                         **config['model_params']['common_params'])
     if not cpu:
-        generator.cuda()
+        #changed
+        generator.to(device)
 
     kp_detector = KPDetector(**config['model_params']['kp_detector_params'],
                              **config['model_params']['common_params'])
     if not cpu:
-        kp_detector.cuda()
+        #changed
+        kp_detector.to(device)
 
     if cpu:
         checkpoint = torch.load(checkpoint_path, map_location=torch.device('cpu'))
