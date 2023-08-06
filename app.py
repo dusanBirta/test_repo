@@ -1,62 +1,59 @@
-import os
-import glob
-import shutil
-import cv2
 import streamlit as st
-import matplotlib.pyplot as plt
+from ultralytics import YOLO
 from PIL import Image
-from ultralytics.engine.model import YOLO
+import cv2
+import os
 
 # Real-ESRGAN enhancement function
-def enhance_image(input_folder='upload', outscale=3.5):
-    result_folder = 'results'
-    if os.path.isdir(result_folder):
-        shutil.rmtree(result_folder)
-    os.mkdir(result_folder)
+def enhance_image(input_image_path, output_image_path):
+    # Enhance the image with Real-ESRGAN
+    os.system(f'python Real-ESRGAN/inference_realesrgan.py -n RealESRGAN_x4plus -i {input_image_path} --outscale 3.5 --face_enhance')
 
-    # Run the Real-ESRGAN enhancement
-    os.system(f'python Real-ESRGAN/inference_realesrgan.py -n RealESRGAN_x4plus -i {input_folder} --outscale {outscale} --face_enhance')
+    # Read the enhanced image
+    enhanced_image = cv2.imread(output_image_path)
+    enhanced_image = cv2.cvtColor(enhanced_image, cv2.COLOR_BGR2RGB)
+    return enhanced_image
 
-    # Display results
-    input_list = sorted(glob.glob(os.path.join(input_folder, '*')))
-    output_list = sorted(glob.glob(os.path.join(result_folder, '*')))
-    for input_path, output_path in zip(input_list, output_list):
-        img_input = cv2.imread(input_path)
-        img_input = cv2.cvtColor(img_input, cv2.COLOR_BGR2RGB)
-        img_output = cv2.imread(output_path)
-        img_output = cv2.cvtColor(img_output, cv2.COLOR_BGR2RGB)
+# Main app
+st.title('Face Detection using YOLOv8 and Real-ESRGAN Enhancement')
+st.subheader('Upload an image to perform face detection and enhancement')
 
-        # You can modify this part to show the images in Streamlit instead of using plt
-        st.image([img_input, img_output], caption=['Input image', 'Real-ESRGAN output'])
+# Upload image
+uploaded_file = st.file_uploader('Choose an image...', type=['jpg', 'jpeg', 'png'])
+if uploaded_file is not None:
+    # Read the uploaded image
+    uploaded_image = Image.open(uploaded_file)
+    image_path = f'image_uploaded.{uploaded_file.type.split("/")[-1]}'
+    uploaded_image.save(image_path)
 
-# Streamlit app
-def main():
-    st.title('YOLOv8 Face Detection & Real-ESRGAN Enhancement')
-    uploaded_file = st.file_uploader("Choose an image...", type=['jpg', 'jpeg', 'png'])
+    # Load YOLO model
+    model = YOLO('yolov8n-face.pt')
 
-    if uploaded_file is not None:
-        st.image(uploaded_file, caption='Uploaded Image.', use_column_width=True)
-        st.write("")
-        st.write("Classifying...")
+    # Predict with the model
+    results = model(image_path)
 
-        upload_folder = 'upload'
-        if os.path.isdir(upload_folder):
-            shutil.rmtree(upload_folder)
-        os.mkdir(upload_folder)
+    # Load the original image
+    original_image = cv2.imread(image_path)
+    original_image = cv2.cvtColor(original_image, cv2.COLOR_BGR2RGB)
 
-        file_path = os.path.join(upload_folder, uploaded_file.name)
-        with open(file_path, 'wb') as f:
-            f.write(uploaded_file.getbuffer())
+    # Iterate through the detection results
+    for result in results:
+        # Get bounding box coordinates in the xyxy format
+        xyxy_boxes = result.boxes.xyxy
 
-        # Load YOLO model
-        model = YOLO('yolov8n-face.pt')
+        # Crop and enhance each bounding box
+        for xyxy_box in xyxy_boxes:
+            # Convert the bounding box coordinates to integers
+            x1, y1, x2, y2 = map(int, xyxy_box)
 
-        # Detect faces
-        results = model(file_path)
-        results.show() # You can modify this to show the result in Streamlit
+            # Crop the image using the bounding box coordinates
+            cropped_image = original_image[y1:y2, x1:x2]
+            cropped_image_path = f'cropped_face.jpg'
+            cv2.imwrite(cropped_image_path, cropped_image)
 
-        # Enhance detected faces using Real-ESRGAN
-        enhance_image(input_folder=upload_folder)
+            # Enhance the cropped face image
+            enhanced_image_path = 'Real-ESRGAN/results/cropped_face_out.jpg'
+            enhanced_image = enhance_image(cropped_image_path, enhanced_image_path)
 
-if __name__ == '__main__':
-    main()
+            # Show the original and enhanced face images in Streamlit
+            st.image([cropped_image, enhanced_image], caption=['Original Face', 'Enhanced Face'])
