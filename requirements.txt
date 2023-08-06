@@ -5,6 +5,11 @@ PILLOW
 torch
 torchvision
 opencv-python
+requests
+imageio
+IPython.display
+base64
+os
 
 # Yolov8 Requirements
 ultralytics
@@ -13,25 +18,14 @@ ultralytics
 ffmpeg-python
 ffmpeg
 gdown
-import imageio
-import requests
 matplotlib.pyplot
 matplotlib.animation
-skimage.transform
-IPython.display
 warnings
 demo
 skimage
-os
-base64
 
 # ESRGAN Requirements
 basicsr
 facexlib
 gfpgan
-requests
-imageio
-IPython.display
-base64
-os
 shutil
