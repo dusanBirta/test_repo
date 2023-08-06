@@ -8,7 +8,7 @@ opencv-python
 requests
 imageio
 #IPython.display
-base64
+#base64
 os
 
 # Yolov8 Requirements
