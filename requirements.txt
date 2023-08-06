@@ -21,7 +21,7 @@ gdown
 #matplotlib.pyplot
 #matplotlib.animation
 #warnings
-demo
+#demo
 skimage
 
 # ESRGAN Requirements
