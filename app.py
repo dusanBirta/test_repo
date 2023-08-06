@@ -40,11 +40,15 @@ if uploaded_file is not None:
     im = Image.fromarray(im_array[..., ::-1])  # RGB PIL image
     st.image(im, caption="Detected faces")
 
+    # Process results
     cropped_faces = []
-    for i, result in enumerate(results):
-        xyxy_boxes = result.boxes.xyxy
+    for r in results:
+        xyxy_boxes = r.boxes.xyxy
         x1, y1, x2, y2 = map(int, xyxy_boxes[0]) # Using detected faces
         cropped_faces.append(im_array[y1:y2, x1:x2, ::-1])
+
+    # Display YOLO detected faces
+    st.image([Image.fromarray(face) for face in cropped_faces], caption=["Face " + str(i) for i in range(len(cropped_faces))])
 
     selected_index = st.selectbox('Choose a face to animate:', range(len(cropped_faces)), 0)
     selected_face = cropped_faces[selected_index]
