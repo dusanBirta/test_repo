@@ -59,7 +59,7 @@ if uploaded_file is not None:
         driving_video = [resize(frame, (256, 256))[..., :3] for frame in reader]
 
         # Load checkpoints
-        generator, kp_detector = load_checkpoints(config_path='config/vox-256.yaml', checkpoint_path=model_path)
+        generator, kp_detector = load_checkpoints(config_path='vox-256.yaml', checkpoint_path=model_path)
 
         # Generate animation
         predictions = make_animation(source_image, driving_video, generator, kp_detector, relative=True)
