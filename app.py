@@ -1,79 +1,72 @@
 import streamlit as st
+import numpy as np
+import cv2
+import gdown
 from ultralytics import YOLO
 from PIL import Image
-import cv2
-import numpy as np
+import imageio
+from skimage.transform import resize
+from demo import load_checkpoints, make_animation
+from skimage import img_as_ubyte
 import os
-#test
+import ffmpeg
 
-def enhance_image(input_image_path, output_image_path):
-    # Enhance the image with Real-ESRGAN
-    enhance_command = f"/home/adminuser/venv/bin/python -m inference_realesrgan -n RealESRGAN_x4plus -i ${input_image_path} --outscale 3.5 --face_enhance"
-    os.system(enhance_command)
+# Title
+st.title('Face Animation using YOLOv8 and First Order Motion Model')
+st.subheader('Upload an image to perform face animation')
 
-    # Read the enhanced image
-    enhanced_image = cv2.imread(output_image_path)
-    enhanced_image = cv2.cvtColor(enhanced_image, cv2.COLOR_BGR2RGB)
-    
-    return enhanced_image
+# Function to play video
+def play_video(video_path):
+    video_file = open(video_path, 'rb')
+    video_bytes = video_file.read()
+    st.video(video_bytes)
 
-# Display title and instruction
-st.title('Face Detection and Enhancement using YOLOv8 and Real-ESRGAN')
-st.subheader('Upload an image to perform face detection and enhancement')
+# Download the pre-trained model
+model_path = 'vox-adv-cpk.pth.tar'
+if not os.path.exists(model_path):
+    gdown.download('https://drive.google.com/uc?id=1L8P-hpBhZi8Q_1vP2KlQ4N6dvlzpYBvZ', model_path, quiet=False)
 
 # Upload image
 uploaded_file = st.file_uploader('Choose an image...', type=['jpg', 'jpeg', 'png'])
 if uploaded_file is not None:
-    # Read the uploaded image
     uploaded_image = Image.open(uploaded_file)
     image_path = f'image_uploaded.{uploaded_file.type.split("/")[-1]}'
     uploaded_image.save(image_path)
 
     # Load YOLO model
     model = YOLO('yolov8n-face.pt')
-
-    # Predict with the model
     results = model(image_path)
 
-    # Show the results
+    # Process results
     for r in results:
         im_array = r.plot()  # plot a BGR numpy array of predictions
         im = Image.fromarray(im_array[..., ::-1])  # RGB PIL image
-        st.image(im, caption='Detected faces')  # Show image in Streamlit
 
-    # Load the original image
-    original_image = cv2.imread(image_path)
-    original_image = cv2.cvtColor(original_image, cv2.COLOR_BGR2RGB)
-
-    # Counter for the face images
-    face_counter = 0
-
-    # Iterate through the detection results
-    for result in results:
-        # Get bounding box coordinates in the xyxy format
+        # Crop detected face
+        result = results[0]
         xyxy_boxes = result.boxes.xyxy
+        x1, y1, x2, y2 = map(int, xyxy_boxes[0]) # Using first face detected
+        cropped_image = im_array[y1:y2, x1:x2, ::-1]
 
-        # Crop and enhance each bounding box
-        for xyxy_box in xyxy_boxes:
-            # Convert the bounding box coordinates to integers
-            x1, y1, x2, y2 = map(int, xyxy_box)
+        # Animate face
+        source_image = resize(cropped_image, (256, 256))[..., :3]
 
-            # Crop the image using the bounding box coordinates
-            cropped_image = original_image[y1:y2, x1:x2]
+        # You may want to replace this URL with a path to a local video file
+        url = 'https://github.com/dusanBirta/Animate-Photos/raw/main/driving.mp4'
+        driving_video_path = 'temp_driving_video.mp4'
+        gdown.download(url, driving_video_path, quiet=False)
+        reader = imageio.get_reader(driving_video_path)
+        driving_video = [resize(frame, (256, 256))[..., :3] for frame in reader]
 
-            # Save the cropped image
-            cropped_image_path = f'cropped_face_{face_counter}.png'
-            cv2.imwrite(cropped_image_path, cv2.cvtColor(cropped_image, cv2.COLOR_RGB2BGR))
+        # Load checkpoints
+        generator, kp_detector = load_checkpoints(config_path='config/vox-256.yaml', checkpoint_path=model_path)
 
-            # Define the enhanced image path
-            enhanced_image_path = cropped_image_path.replace('.png', '_out.jpg')
+        # Generate animation
+        predictions = make_animation(source_image, driving_video, generator, kp_detector, relative=True)
 
-            # Enhance the cropped image
-            enhanced_image = enhance_image(cropped_image_path, enhanced_image_path)
+        # Save animation
+        animation_path = 'output.mp4'
+        imageio.mimsave(animation_path, [img_as_ubyte(frame) for frame in predictions], fps=20)
 
-            # Convert enhanced image to PIL Image and show in Streamlit
-            enhanced_pil_image = Image.fromarray(enhanced_image)
-            st.image(enhanced_pil_image, caption=f'Enhanced Face {face_counter}')
-
-            # Increment the face counter
-            face_counter += 1
+        # Display animation
+        play_video(animation_path)
