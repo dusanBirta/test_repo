@@ -43,7 +43,7 @@ if uploaded_file is not None:
         im = Image.fromarray(im_array[..., ::-1])  # Convert to RGB PIL image
         st.image(im, caption="YOLO Prediction with Bounding Boxes")
 
-        xyxy_boxes = r.boxes.xyxy
+        xyxy_boxes = r.boxes.xyxy.cpu().numpy()  # Convert tensor to NumPy array
         cropped_faces = [im_array[y1:y2, x1:x2, ::-1] for x1, y1, x2, y2 in xyxy_boxes.astype(int)] # Crop and convert to RGB
 
     # Display cropped faces
